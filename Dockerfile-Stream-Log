@@ -44,6 +44,10 @@ WORKDIR /app
 # Copy the Go binary from the builder stage
 COPY --from=builder /app/stream_log /usr/local/bin/stream_log
 
+COPY ./stream_log/scripts/server.sh /server.sh
+
+RUN chmod +x /server.sh
+
 # Make binary executable
 RUN chmod +x /usr/local/bin/stream_log
 
@@ -54,4 +58,4 @@ VOLUME ["/usr/local/bin/db"]
 EXPOSE 8080
 
 # Default command
-CMD ["stream_log"]
+CMD ["/server.sh"]

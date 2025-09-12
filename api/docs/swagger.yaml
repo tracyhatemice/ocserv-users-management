@@ -82,7 +82,7 @@ definitions:
     type: object
   home.GetHomeResponse:
     properties:
-      ipbans:
+      ip_bans:
         items:
           $ref: '#/definitions/models.IPBanPoints'
         type: array
@@ -92,6 +92,10 @@ definitions:
         items:
           $ref: '#/definitions/models.DailyTraffic'
         type: array
+      top_bandwidth_user:
+        $ref: '#/definitions/repository.TopBandwidthUsers'
+      total_bandwidth:
+        $ref: '#/definitions/repository.TotalBandwidths'
       users:
         $ref: '#/definitions/home.GetHomeUser'
     required:
@@ -554,6 +558,27 @@ definitions:
         - TotallyReceive
         example: MonthlyTransmit
         type: string
+    type: object
+  repository.TopBandwidthUsers:
+    properties:
+      top_rx:
+        items:
+          $ref: '#/definitions/models.OcservUser'
+        type: array
+      top_tx:
+        items:
+          $ref: '#/definitions/models.OcservUser'
+        type: array
+    type: object
+  repository.TotalBandwidths:
+    properties:
+      rx:
+        type: number
+      tx:
+        type: number
+    required:
+    - rx
+    - tx
     type: object
   request.ErrorResponse:
     properties:

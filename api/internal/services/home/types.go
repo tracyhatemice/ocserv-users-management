@@ -1,6 +1,9 @@
 package home
 
-import "github.com/mmtaee/ocserv-users-management/common/models"
+import (
+	"github.com/mmtaee/ocserv-users-management/api/internal/repository"
+	"github.com/mmtaee/ocserv-users-management/common/models"
+)
 
 type GeneralInfo struct {
 	ServerPID           int    `json:"Server PID"`
@@ -59,9 +62,11 @@ type GetHomeUser struct {
 }
 
 type GetHomeResponse struct {
-	ServerStatus ServerStatusResponse   `json:"server_status" validate:"required"`
-	Statistics   *[]models.DailyTraffic `json:"statistics" validate:"omitempty"`
-	Users        GetHomeUser            `json:"users" validate:"omitempty"`
-	IPBans       *[]models.IPBanPoints  `json:"ipbans" validate:"omitempty"`
+	ServerStatus     ServerStatusResponse         `json:"server_status" validate:"required"`
+	Statistics       *[]models.DailyTraffic       `json:"statistics" validate:"omitempty"`
+	Users            GetHomeUser                  `json:"users" validate:"omitempty"`
+	IPBans           *[]models.IPBanPoints        `json:"ip_bans" validate:"omitempty"`
+	TopBandwidthUser repository.TopBandwidthUsers `json:"top_bandwidth_user" validate:"omitempty"`
+	TotalBandwidth   repository.TotalBandwidths   `json:"total_bandwidth" validate:"omitempty"`
 	//IRoutes    *[]models.Iroute       `json:"iroutes" validate:"omitempty"` // has bug on version 1.2.4
 }

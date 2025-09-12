@@ -40,16 +40,18 @@ func (ctl *Controller) Home(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	var (
-		status      ServerStatusResponse
-		statistics  *[]models.DailyTraffic
-		onlineUsers *[]models.OnlineUserSession
-		TotalUser   int64
-		ipBans      *[]models.IPBanPoints
-		errs        = make(chan error, 4)
-		wg          sync.WaitGroup
+		status           ServerStatusResponse
+		statistics       *[]models.DailyTraffic
+		onlineUsers      *[]models.OnlineUserSession
+		TotalUser        int64
+		ipBans           *[]models.IPBanPoints
+		topBandwidthUser repository.TopBandwidthUsers
+		totalBandwidth   repository.TotalBandwidths
+		errs             = make(chan error, 4)
+		wg               sync.WaitGroup
 	)
 
-	wg.Add(5)
+	wg.Add(7)
 
 	go func() {
 		defer wg.Done()
@@ -103,6 +105,26 @@ func (ctl *Controller) Home(c echo.Context) error {
 		TotalUser = users
 	}()
 
+	go func() {
+		defer wg.Done()
+		topUser, err := ctl.ocservUserRepo.TopBandwidthUser(ctx)
+		if err != nil {
+			errs <- err
+			return
+		}
+		topBandwidthUser = topUser
+	}()
+
+	go func() {
+		defer wg.Done()
+		bandwidth, err := ctl.ocservUserRepo.TotalTBandwidth(ctx)
+		if err != nil {
+			errs <- err
+			return
+		}
+		totalBandwidth = bandwidth
+	}()
+
 	wg.Wait()
 	close(errs)
 
@@ -119,6 +141,8 @@ func (ctl *Controller) Home(c echo.Context) error {
 			Total:  TotalUser,
 			Online: onlineUsers,
 		},
+		TopBandwidthUser: topBandwidthUser,
+		TotalBandwidth:   totalBandwidth,
 	}
 
 	return c.JSON(http.StatusOK, resp)

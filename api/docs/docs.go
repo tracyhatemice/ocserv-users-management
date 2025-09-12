@@ -1760,7 +1760,7 @@ const docTemplate = `{
                 "server_status"
             ],
             "properties": {
-                "ipbans": {
+                "ip_bans": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.IPBanPoints"
@@ -1774,6 +1774,12 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.DailyTraffic"
                     }
+                },
+                "top_bandwidth_user": {
+                    "$ref": "#/definitions/repository.TopBandwidthUsers"
+                },
+                "total_bandwidth": {
+                    "$ref": "#/definitions/repository.TotalBandwidths"
                 },
                 "users": {
                     "$ref": "#/definitions/home.GetHomeUser"
@@ -2388,6 +2394,38 @@ const docTemplate = `{
                         "TotallyReceive"
                     ],
                     "example": "MonthlyTransmit"
+                }
+            }
+        },
+        "repository.TopBandwidthUsers": {
+            "type": "object",
+            "properties": {
+                "top_rx": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OcservUser"
+                    }
+                },
+                "top_tx": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OcservUser"
+                    }
+                }
+            }
+        },
+        "repository.TotalBandwidths": {
+            "type": "object",
+            "required": [
+                "rx",
+                "tx"
+            ],
+            "properties": {
+                "rx": {
+                    "type": "number"
+                },
+                "tx": {
+                    "type": "number"
                 }
             }
         },

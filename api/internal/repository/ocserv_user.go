@@ -7,8 +7,19 @@ import (
 	"github.com/mmtaee/ocserv-users-management/common/ocserv/user"
 	"github.com/mmtaee/ocserv-users-management/common/pkg/database"
 	"gorm.io/gorm"
+	"log"
 	"time"
 )
+
+type TopBandwidthUsers struct {
+	TopRX []models.OcservUser `json:"top_rx"`
+	TopTX []models.OcservUser `json:"top_tx"`
+}
+
+type TotalBandwidths struct {
+	RX float64 `json:"rx" validate:"required"`
+	TX float64 `json:"tx" validate:"required"`
+}
 
 type OcservUserRepository struct {
 	db                   *gorm.DB
@@ -28,6 +39,8 @@ type OcservUserRepositoryInterface interface {
 	UserStatistics(ctx context.Context, uid string, dateStart, dateEnd *time.Time) (*[]models.DailyTraffic, error)
 	Statistics(ctx context.Context, dateStart, dateEnd *time.Time) (*[]models.DailyTraffic, error)
 	TotalUsers(ctx context.Context) (int64, error)
+	TopBandwidthUser(ctx context.Context) (TopBandwidthUsers, error)
+	TotalTBandwidth(ctx context.Context) (TotalBandwidths, error)
 }
 
 func NewtOcservUserRepository() *OcservUserRepository {
@@ -165,13 +178,15 @@ func (o *OcservUserRepository) Delete(ctx context.Context, uid string) error {
 func (o *OcservUserRepository) TenDaysStats(ctx context.Context) (*[]models.DailyTraffic, error) {
 	var results []models.DailyTraffic
 
+	start := time.Now().AddDate(0, 0, -10).Truncate(24 * time.Hour)
+
 	err := o.db.WithContext(ctx).
 		Model(&models.OcservUserTrafficStatistics{}).
 		Select(`
 		DATE(created_at) AS date,
 		SUM(rx) / 1073741824.0 AS rx,
 		SUM(tx) / 1073741824.0 AS tx`).
-		Where("created_at >= ?", time.Now().AddDate(0, 0, -10)).
+		Where("created_at >= ?", start).
 		Group("DATE(created_at)").
 		Order("DATE(created_at)").
 		Scan(&results).Error
@@ -260,7 +275,55 @@ func (o *OcservUserRepository) TotalUsers(ctx context.Context) (int64, error) {
 
 	err := o.db.WithContext(ctx).Model(&models.OcservUser{}).Count(&totalRecords).Error
 	if err != nil {
+		log.Println("error on TotalUsers: ", err)
 		return 0, err
 	}
 	return totalRecords, nil
+}
+
+func (o *OcservUserRepository) TopBandwidthUser(ctx context.Context) (TopBandwidthUsers, error) {
+	var (
+		topRx []models.OcservUser
+		topTx []models.OcservUser
+	)
+
+	result := TopBandwidthUsers{}
+
+	// Top RX
+	if err := o.db.WithContext(ctx).
+		Model(&models.OcservUser{}).
+		Select("uid, rx, tx, username, created_at").
+		Order("rx DESC, id DESC").
+		Limit(4).
+		Find(&topRx).Error; err != nil {
+		return result, err
+	}
+	result.TopRX = topRx
+
+	// Top TX
+	if err := o.db.WithContext(ctx).
+		Model(&models.OcservUser{}).
+		Select("uid, rx, tx, username, created_at").
+		Order("tx DESC, id DESC").
+		Limit(4).
+		Find(&topTx).Error; err != nil {
+		return result, err
+	}
+	result.TopTX = topTx
+
+	return result, nil
+}
+
+func (o *OcservUserRepository) TotalTBandwidth(ctx context.Context) (TotalBandwidths, error) {
+	var total TotalBandwidths
+	err := o.db.WithContext(ctx).
+		Model(&models.OcservUserTrafficStatistics{}).
+		Select(`
+        COALESCE(SUM(rx),0) / 1073741824.0 AS rx,
+        COALESCE(SUM(tx),0) / 1073741824.0 AS tx`).
+		Scan(&total).Error
+	if err != nil {
+		return total, err
+	}
+	return total, nil
 }
