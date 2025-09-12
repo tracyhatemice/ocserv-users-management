@@ -53,10 +53,15 @@ type ServerStatusResponse struct {
 	CurrentStats CurrentStats `json:"current_stats"`
 }
 
+type GetHomeUser struct {
+	Total  int64                       `json:"total" validate:"omitempty"`
+	Online *[]models.OnlineUserSession `json:"online_users_session" validate:"omitempty"`
+}
+
 type GetHomeResponse struct {
-	ServerStatus ServerStatusResponse        `json:"server_status" validate:"required"`
-	Statistics   *[]models.DailyTraffic      `json:"statistics" validate:"omitempty"`
-	OnlineUser   *[]models.OnlineUserSession `json:"online_users_session" validate:"omitempty"`
-	IPBans       *[]models.IPBanPoints       `json:"ipbans" validate:"omitempty"`
+	ServerStatus ServerStatusResponse   `json:"server_status" validate:"required"`
+	Statistics   *[]models.DailyTraffic `json:"statistics" validate:"omitempty"`
+	Users        GetHomeUser            `json:"users" validate:"omitempty"`
+	IPBans       *[]models.IPBanPoints  `json:"ipbans" validate:"omitempty"`
 	//IRoutes    *[]models.Iroute       `json:"iroutes" validate:"omitempty"` // has bug on version 1.2.4
 }

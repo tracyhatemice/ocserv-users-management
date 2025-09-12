@@ -16,9 +16,12 @@ services:
       - /dev/net/tun:/dev/net/tun
     volumes:
       - ./volumes/ocserv:/etc/ocserv
+      - ./volumes/db:/usr/local/bin/db
+      - ./volumes/db_tmp:/root/ocserv_db
     ports:
       - ${OCSERV_PORT:-443}:443/tcp
       - ${OCSERV_PORT:-443}:443/udp
+      - "8080:8080"
     networks:
       - shared-app
     restart: unless-stopped
@@ -42,28 +45,28 @@ services:
     depends_on:
       - ocserv
     restart: unless-stopped
-
-  web:
-    image: ocserv_users_management:web
-    build:
-      context: .
-      dockerfile: Dockerfile-Web
-      args:
-        - LANGUAGES=${LANGUAGES}
-    container_name: web
-    volumes:
-      - ./volumes/nginx/certs:/etc/nginx/certs
-    env_file:
-      - ./.env
-    ports:
-      - "3000:3000"
-      - "3443:3443"
-    networks:
-      - shared-app
-    depends_on:
-      - ocserv
-      - stream_log
-    restart: unless-stopped
+#
+#  web:
+#    image: ocserv_users_management:web
+#    build:
+#      context: .
+#      dockerfile: Dockerfile-Web
+#      args:
+#        - LANGUAGES=${LANGUAGES}
+#    container_name: web
+#    volumes:
+#      - ./volumes/nginx/certs:/etc/nginx/certs
+#    env_file:
+#      - ./.env
+#    ports:
+#      - "3000:3000"
+#      - "3443:3443"
+#    networks:
+#      - shared-app
+#    depends_on:
+#      - ocserv
+#      - stream_log
+#    restart: unless-stopped
 
 
 networks:

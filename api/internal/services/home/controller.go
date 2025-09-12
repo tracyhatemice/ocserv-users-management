@@ -43,12 +43,13 @@ func (ctl *Controller) Home(c echo.Context) error {
 		status      ServerStatusResponse
 		statistics  *[]models.DailyTraffic
 		onlineUsers *[]models.OnlineUserSession
+		TotalUser   int64
 		ipBans      *[]models.IPBanPoints
 		errs        = make(chan error, 4)
 		wg          sync.WaitGroup
 	)
 
-	wg.Add(4)
+	wg.Add(5)
 
 	go func() {
 		defer wg.Done()
@@ -92,6 +93,16 @@ func (ctl *Controller) Home(c echo.Context) error {
 		ipBans = ips
 	}()
 
+	go func() {
+		defer wg.Done()
+		users, err := ctl.ocservUserRepo.TotalUsers(ctx)
+		if err != nil {
+			errs <- err
+			return
+		}
+		TotalUser = users
+	}()
+
 	wg.Wait()
 	close(errs)
 
@@ -103,8 +114,11 @@ func (ctl *Controller) Home(c echo.Context) error {
 	resp := GetHomeResponse{
 		ServerStatus: status,
 		Statistics:   statistics,
-		OnlineUser:   onlineUsers,
 		IPBans:       ipBans,
+		Users: GetHomeUser{
+			Total:  TotalUser,
+			Online: onlineUsers,
+		},
 	}
 
 	return c.JSON(http.StatusOK, resp)

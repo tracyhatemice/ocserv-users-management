@@ -27,6 +27,7 @@ type OcservUserRepositoryInterface interface {
 	UpdateUsersByDeleteGroup(ctx context.Context, groupName string) (*[]models.OcservUser, error)
 	UserStatistics(ctx context.Context, uid string, dateStart, dateEnd *time.Time) (*[]models.DailyTraffic, error)
 	Statistics(ctx context.Context, dateStart, dateEnd *time.Time) (*[]models.DailyTraffic, error)
+	TotalUsers(ctx context.Context) (int64, error)
 }
 
 func NewtOcservUserRepository() *OcservUserRepository {
@@ -252,4 +253,14 @@ func (o *OcservUserRepository) Statistics(ctx context.Context, dateStart, dateEn
 		return nil, err
 	}
 	return &results, nil
+}
+
+func (o *OcservUserRepository) TotalUsers(ctx context.Context) (int64, error) {
+	var totalRecords int64
+
+	err := o.db.WithContext(ctx).Model(&models.OcservUser{}).Count(&totalRecords).Error
+	if err != nil {
+		return 0, err
+	}
+	return totalRecords, nil
 }

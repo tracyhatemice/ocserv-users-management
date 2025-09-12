@@ -86,18 +86,25 @@ definitions:
         items:
           $ref: '#/definitions/models.IPBanPoints'
         type: array
-      online_users_session:
-        items:
-          $ref: '#/definitions/models.OnlineUserSession'
-        type: array
       server_status:
         $ref: '#/definitions/home.ServerStatusResponse'
       statistics:
         items:
           $ref: '#/definitions/models.DailyTraffic'
         type: array
+      users:
+        $ref: '#/definitions/home.GetHomeUser'
     required:
     - server_status
+    type: object
+  home.GetHomeUser:
+    properties:
+      online_users_session:
+        items:
+          $ref: '#/definitions/models.OnlineUserSession'
+        type: array
+      total:
+        type: integer
     type: object
   home.ServerStatusResponse:
     properties:

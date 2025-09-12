@@ -1766,12 +1766,6 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.IPBanPoints"
                     }
                 },
-                "online_users_session": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.OnlineUserSession"
-                    }
-                },
                 "server_status": {
                     "$ref": "#/definitions/home.ServerStatusResponse"
                 },
@@ -1780,6 +1774,23 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.DailyTraffic"
                     }
+                },
+                "users": {
+                    "$ref": "#/definitions/home.GetHomeUser"
+                }
+            }
+        },
+        "home.GetHomeUser": {
+            "type": "object",
+            "properties": {
+                "online_users_session": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OnlineUserSession"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
