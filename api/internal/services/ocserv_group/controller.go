@@ -77,6 +77,32 @@ func (ctl *Controller) OcservGroups(c echo.Context) error {
 	})
 }
 
+// OcservGroup 	 Ocserv group detail
+//
+// @Summary      Ocserv group detail
+// @Description  Ocserv group detail
+// @Tags         Ocserv(Groups)
+// @Accept       json
+// @Produce      json
+// @Param 		 id path int true "Ocserv Group ID"
+// @Param        Authorization header string true "Bearer TOKEN"
+// @Failure      400 {object} request.ErrorResponse
+// @Failure      401 {object} middlewares.Unauthorized
+// @Success      200  {object}  models.OcservGroup
+// @Router       /ocserv/groups/{id} [get]
+func (ctl *Controller) OcservGroup(c echo.Context) error {
+	groupID := c.Param("id")
+	if groupID == "" {
+		return ctl.request.BadRequest(c, errors.New("invalid group id"))
+	}
+
+	group, err := ctl.ocservGroupRepo.GetByID(c.Request().Context(), groupID)
+	if err != nil {
+		return ctl.request.BadRequest(c, err)
+	}
+	return c.JSON(http.StatusOK, group)
+}
+
 // CreateOcservGroup 	     Ocserv Group creation
 //
 // @Summary      Ocserv Group creation
@@ -125,7 +151,7 @@ func (ctl *Controller) CreateOcservGroup(c echo.Context) error {
 func (ctl *Controller) UpdateOcservGroup(c echo.Context) error {
 	groupID := c.Param("id")
 	if groupID == "" {
-		return ctl.request.BadRequest(c, errors.New("group uid is empty"))
+		return ctl.request.BadRequest(c, errors.New("invalid group id"))
 	}
 
 	var data UpdateOcservGroupData

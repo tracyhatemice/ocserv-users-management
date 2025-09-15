@@ -939,6 +939,39 @@ paths:
       summary: Ocserv Group delete
       tags:
       - Ocserv(Groups)
+    get:
+      consumes:
+      - application/json
+      description: Ocserv group detail
+      parameters:
+      - description: Ocserv Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Bearer TOKEN
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.OcservGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/request.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middlewares.Unauthorized'
+      summary: Ocserv group detail
+      tags:
+      - Ocserv(Groups)
     patch:
       consumes:
       - application/json
