@@ -327,20 +327,20 @@ get_envs(){
     # -----------------------
     # Database configuration
     # -----------------------
-    read -rp "Enter PostgreSQL database name or leave blank to use default (${DB_NAME}): " db_name
-    [[ -n "$db_name" ]] && DB_NAME="$db_name"
-    print_message highlight "✅ Using DB_NAME: ${DB_NAME}"
-    printf "\n"
-
-    read -rp "Enter PostgreSQL username or leave blank to use default (${DB_USERNAME}): " db_user
-    [[ -n "$db_user" ]] && DB_USERNAME="$db_user"
-    print_message highlight "✅ Using DB_USERNAME: ${DB_USERNAME}"
-    printf "\n"
-
-    read -rp "Enter PostgreSQL password or leave blank to use default (${DB_PASSWORD}): " db_pass
-    [[ -n "$db_pass" ]] && DB_PASSWORD="$db_pass"
-    print_message highlight "✅ Using DB_PASSWORD: ${DB_PASSWORD}"
-    printf "\n"
+#    read -rp "Enter PostgreSQL database name or leave blank to use default (${DB_NAME}): " db_name
+#    [[ -n "$db_name" ]] && DB_NAME="$db_name"
+#    print_message highlight "✅ Using DB_NAME: ${DB_NAME}"
+#    printf "\n"
+#
+#    read -rp "Enter PostgreSQL username or leave blank to use default (${DB_USERNAME}): " db_user
+#    [[ -n "$db_user" ]] && DB_USERNAME="$db_user"
+#    print_message highlight "✅ Using DB_USERNAME: ${DB_USERNAME}"
+#    printf "\n"
+#
+#    read -rp "Enter PostgreSQL password or leave blank to use default (${DB_PASSWORD}): " db_pass
+#    [[ -n "$db_pass" ]] && DB_PASSWORD="$db_pass"
+#    print_message highlight "✅ Using DB_PASSWORD: ${DB_PASSWORD}"
+#    printf "\n"
 }
 
 # ===============================
@@ -405,10 +405,10 @@ SSL_EXPIRE=${SSL_EXPIRE}
 OCSERV_PORT=${OCSERV_PORT}
 OCSERV_DNS=${OCSERV_DNS}
 LANGUAGES="${LANGUAGES}"
-DB_NAME=${DB_NAME}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
-DB_HOST=${DB_HOST}
+#DB_NAME=${DB_NAME}
+#DB_USERNAME=${DB_USERNAME}
+#DB_PASSWORD=${DB_PASSWORD}
+#DB_HOST=${DB_HOST}
 EOL
 
     print_message success "✅ Environment file created successfully."
@@ -426,10 +426,10 @@ EOL
     print_message highlight "   OCSERV_PORT  = ${OCSERV_PORT}"
     print_message highlight "   OCSERV_DNS   = ${OCSERV_DNS}"
     print_message highlight "   LANGUAGES    = ${LANGUAGES}"
-    print_message highlight "   DB_NAME      = ${DB_NAME}"
-    print_message highlight "   DB_HOST      = ${DB_HOST}"
-    print_message highlight "   DB_USERNAME  = ${DB_USERNAME}"
-    print_message highlight "   DB_PASSWORD  = ${DB_PASSWORD:0:2}..."
+#    print_message highlight "   DB_NAME      = ${DB_NAME}"
+#    print_message highlight "   DB_HOST      = ${DB_HOST}"
+#    print_message highlight "   DB_USERNAME  = ${DB_USERNAME}"
+#    print_message highlight "   DB_PASSWORD  = ${DB_PASSWORD:0:2}..."
 
 
     printf "\n"
@@ -545,7 +545,7 @@ deploy(){
     if [[ "$DEPLOY_METHOD" == "docker" ]]; then
         setup_docker
     else
-        export DB_HOST=127.0.0.1
+#        export DB_HOST=127.0.0.1
         setup_systemd
     fi
 }

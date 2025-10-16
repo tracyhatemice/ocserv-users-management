@@ -10,6 +10,7 @@ import DeleteDialog from '@/components/user/DeleteDialog.vue';
 import ChangePasswordDialog from '@/components/user/ChangePasswordDialog.vue';
 import Pagination from '@/components/shared/Pagination.vue';
 import type { Meta } from '@/types/metaTypes/MetaType';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 const { t } = useI18n();
 const loading = ref(false);
@@ -27,6 +28,8 @@ const meta = reactive<Meta>({
     sort: 'ASC',
     total_records: 0
 });
+
+const snackbar = useSnackbarStore();
 
 const api = new SystemUsersApi();
 
@@ -68,6 +71,12 @@ const deleteStaff = () => {
         uid: staffUID.value
     })
         .then(() => {
+            snackbar.show({
+                id: 1,
+                message: t('USER_DELETED_SUCCESS_SNACK'),
+                color: 'success',
+                timeout: 4000
+            });
             getStaffs();
         })
         .finally(() => {
@@ -96,7 +105,12 @@ const changePassword = (password: string) => {
         }
     })
         .then(() => {
-            //     TODO: snackbar
+            snackbar.show({
+                id: 1,
+                message: t('PASSWORD_CHANGE_SUCCESS_SNACK'),
+                color: 'success',
+                timeout: 4000
+            });
         })
         .finally(() => {
             cancelChangePassword();

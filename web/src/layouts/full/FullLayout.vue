@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import { RouterView } from 'vue-router';
 import MainView from './Main.vue';
-import Snackbar from '@/components/shared/Snackbar.vue';
-import Loading from '@/components/shared/Loading.vue';
 </script>
 
 <template>
@@ -15,8 +13,6 @@ import Loading from '@/components/shared/Loading.vue';
                         <RouterView />
                     </div>
                 </v-container>
-                <Snackbar />
-                <Loading />
             </v-main>
         </v-app>
     </v-locale-provider>

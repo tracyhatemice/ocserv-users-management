@@ -7,4 +7,4 @@
 - [x] api loading
 - [x] 404 page
 - [x] locales
-- [ ] complete todo text in code
+- [x] complete todo text in code

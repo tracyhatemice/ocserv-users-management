@@ -9,6 +9,7 @@ import { bytesToGB, formatDate, trafficTypesTransformer } from '@/utils/converto
 import DeleteDialog from '@/components/ocserv_user/DeleteDialog.vue';
 import Pagination from '@/components/shared/Pagination.vue';
 import type { Meta } from '@/types/metaTypes/MetaType';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 const { t } = useI18n();
 const loading = ref(false);
@@ -24,6 +25,8 @@ const deleteUserName = ref('');
 const deleteUserUID = ref('');
 
 const users = reactive<ModelsOcservUser[]>([]);
+
+const snackbar = useSnackbarStore();
 
 const getUsers = () => {
     loading.value = true;
@@ -60,7 +63,12 @@ const disconnect = (username: string) => {
             }
         })
         .finally(() => {
-            //     TODO: snackBar
+            snackbar.show({
+                id: 1,
+                message: t('USER_DISCONNECTED_SUCCESS_SNACK'),
+                color: 'success',
+                timeout: 4000
+            });
         });
 };
 
@@ -76,7 +84,12 @@ const lock = (uid: string) => {
             }
         })
         .finally(() => {
-            //     TODO: snackBar
+            snackbar.show({
+                id: 1,
+                message: t('USER_LOCKED_SUCCESSFULLY_SNACK'),
+                color: 'success',
+                timeout: 4000
+            });
         });
 };
 
@@ -92,7 +105,12 @@ const unlock = (uid: string) => {
             }
         })
         .finally(() => {
-            //     TODO: snackBar
+            snackbar.show({
+                id: 1,
+                message: t('USER_UNLOCKED_SUCCESSFULLY_SNACK'),
+                color: 'success',
+                timeout: 4000
+            });
         });
 };
 

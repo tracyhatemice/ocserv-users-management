@@ -21,6 +21,7 @@ import UsersOverview from '@/components/dashboard/UsersOverview.vue';
 import RxTxDonutOverview from '@/components/dashboard/RxTxDonutOverview.vue';
 import RxTxChartOverview from '@/components/dashboard/RxTxChartOverview.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import { dummyBanIPs, dummyOnlineUsers, dummyTrafficData } from '@/data/dummy';
 
 const trafficData = ref<ModelsDailyTraffic[]>([]);
 const users = ref<HomeGetHomeUser>({});
@@ -50,7 +51,7 @@ onMounted(() => {
         //     online_users_session: dummyOnlineUsers
         // };
         // trafficData.value = dummyTrafficData
-        // console.log('ipBanPoints: ', ipBanPoints);
+        // totalBandwidths.value = {rx: 10.444, tx: 33.44}
     });
 });
 </script>

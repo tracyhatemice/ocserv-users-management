@@ -197,23 +197,24 @@ if [[ -z "$CURRENT_NODE_VERSION" || "$CURRENT_NODE_MAJOR" -lt "$REQUIRED_NODE_MA
     warn "Node.js not found or older than ${REQUIRED_NODE_MAJOR}.x (current: ${CURRENT_NODE_VERSION:-none}). Installing Node.js 23.x..."
     curl -fsSL https://deb.nodesource.com/setup_23.x | sudo -E bash -
     sudo apt-get install -y nodejs
+
     CURRENT_NODE_VERSION=$(node -v | sed 's/^v//')
     ok "Node.js installed: v$CURRENT_NODE_VERSION"
 else
     ok "Node.js is already installed: v$CURRENT_NODE_VERSION"
 fi
 
+sudo npm install -g yarn
+
 # -----------------------
 # Build frontend
 # -----------------------
 cd ./web
-log "Installing npm dependencies..."
-npm install --legacy-peer-deps
-export NODE_ENV=production
-export VITE_I18N_LANGUAGES="${LANGUAGES:-en}"
+log "Installing yarn dependencies..."
+yarn install
 
 log "Building frontend..."
-npm run build
+NODE_ENV=production VITE_I18N_LANGUAGES="${LANGUAGES:-en}" yarn run build
 [[ -d dist ]] || die "dist folder not found after build"
 
 # -----------------------
