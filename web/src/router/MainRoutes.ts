@@ -84,7 +84,7 @@ const MainRoutes = {
         {
             name: 'Server Logs',
             path: '/logs/server',
-            component: () => import('@/views/logs/Server.vue')
+            component: () => import('@/views/loggers/Server.vue')
         }
     ]
 };
