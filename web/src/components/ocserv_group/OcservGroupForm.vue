@@ -54,8 +54,7 @@ const createGroup = () => {
 };
 
 const updateGroup = () => {
-    Object.assign(updateData.config, createData.config);
-    emit('updateGroup', updateData.config);
+    emit('updateGroup', props.initData?.id , updateData.config);
 };
 
 const addRoutes = (key: string) => {
