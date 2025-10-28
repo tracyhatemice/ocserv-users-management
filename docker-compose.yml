@@ -2,7 +2,7 @@ services:
   ocserv:
     build:
       context: .
-      dockerfile: services/Dockerfile-Ocserv
+      dockerfile: Dockerfile-Ocserv
     image: ocserv_users_management:ocserv_with_api
     container_name: ocserv
     privileged: true
@@ -30,7 +30,7 @@ services:
     image: ocserv_users_management:stream_log
     build:
       context: .
-      dockerfile: services/Dockerfile-Stream-Log
+      dockerfile: Dockerfile-Stream-Log
     container_name: stream_log
     volumes:
       - ./volumes/db:/usr/local/bin/db
@@ -52,7 +52,7 @@ services:
     image: ocserv_users_management:web
     build:
       context: .
-      dockerfile: web/Dockerfile-Web
+      dockerfile: Dockerfile-Web
       args:
         - LANGUAGES=${LANGUAGES}
     container_name: web
