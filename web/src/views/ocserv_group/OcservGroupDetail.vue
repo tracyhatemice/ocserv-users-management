@@ -10,7 +10,7 @@ import { router } from '@/router';
 const props = defineProps<{ id?: number }>();
 
 const { t } = useI18n();
-const result = ref<ModelsOcservGroup>({ config: undefined, id: 0, name: '' });
+const result = ref<ModelsOcservGroup>({ config: undefined, id: 0, name: '', owner: '' });
 
 const configArrayKeys = ['route', 'no-route', 'dns', 'split-dns'];
 const resultArrayObj = ref<ModelsOcservGroupConfig>({});

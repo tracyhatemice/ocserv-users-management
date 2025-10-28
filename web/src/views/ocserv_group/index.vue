@@ -7,6 +7,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { getAuthorization } from '@/utils/request';
 import DeleteDialog from '@/components/ocserv_group/DeleteDialog.vue';
 import type { Meta } from '@/types/metaTypes/MetaType';
+import { useProfileStore } from '@/stores/profile';
 
 const { t } = useI18n();
 const api = new OcservGroupsApi();
@@ -21,6 +22,9 @@ const loading = ref(false);
 const deleteDialog = ref(false);
 const deleteGroupName = ref('');
 const deleteGroupID = ref(0);
+
+const profileStore = useProfileStore();
+const isAdmin = ref(profileStore.isAdmin);
 
 const getGroups = () => {
     loading.value = true;
@@ -93,11 +97,12 @@ onMounted(() => {
 
                 <v-progress-linear :active="loading" indeterminate></v-progress-linear>
 
-                <v-table v-if="!loading && groups.length > 0" class="px-md-15" fixed-header striped="even">
+                <v-table v-if="!loading && groups.length > 0" class="px-md-15 my-md-10">
                     <thead>
-                        <tr>
+                        <tr class="text-capitalize bg-lightprimary">
                             <th class="text-left">ID</th>
                             <th class="text-left">{{ t('NAME') }}</th>
+                            <th class="text-left" v-if="isAdmin">{{ t('OWNER') }}</th>
                             <th class="text-left">{{ t('ACTION') }}</th>
                         </tr>
                     </thead>
@@ -105,6 +110,7 @@ onMounted(() => {
                         <tr v-for="item in groups" :key="item.name">
                             <td>{{ item.id }}</td>
                             <td>{{ item.name }}</td>
+                            <td v-if="isAdmin">{{ item.owner }}</td>
                             <td>
                                 <v-menu>
                                     <template v-slot:activator="{ props }">
@@ -152,3 +158,21 @@ onMounted(() => {
 
     <DeleteDialog :name="deleteGroupName" :show="deleteDialog" @close="cancelDeleteGroup" @deleteGroup="deleteGroup" />
 </template>
+
+<style scoped>
+tbody tr:nth-child(even) td {
+    background-color: #f5f5f5;
+}
+
+@media (min-width: 992px) {
+    tbody tr:nth-child(even) td {
+        background-color: #f5f5f5;
+    }
+    tbody tr:nth-child(even) td:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+    tbody tr:nth-child(even) td:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+}
+</style>

@@ -13,7 +13,7 @@ const props = defineProps<{ id?: number }>();
 
 const { t } = useI18n();
 const loading = ref(false);
-const result = ref<ModelsOcservGroup>({ config: undefined, id: 0, name: '' });
+const result = ref<ModelsOcservGroup>({ config: undefined, id: 0, name: '', owner: '' });
 
 const api = new OcservGroupsApi();
 

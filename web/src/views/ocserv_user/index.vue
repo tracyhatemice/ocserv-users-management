@@ -10,6 +10,7 @@ import DeleteDialog from '@/components/ocserv_user/DeleteDialog.vue';
 import Pagination from '@/components/shared/Pagination.vue';
 import type { Meta } from '@/types/metaTypes/MetaType';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useProfileStore } from '@/stores/profile';
 
 const { t } = useI18n();
 const loading = ref(false);
@@ -25,8 +26,10 @@ const deleteUserName = ref('');
 const deleteUserUID = ref('');
 
 const users = reactive<ModelsOcservUser[]>([]);
-
 const snackbar = useSnackbarStore();
+
+const profileStore = useProfileStore();
+const isAdmin = ref(profileStore.isAdmin);
 
 const getUsers = () => {
     loading.value = true;
@@ -172,11 +175,11 @@ onMounted(() => {
                 <v-progress-linear :active="loading" indeterminate></v-progress-linear>
 
                 <div v-if="!loading && users.length > 0">
-                    <v-table class="px-md-15" fixed-header striped="even">
-                        <thead class="text-capitalize">
-                            <tr>
+                    <v-table class="px-md-15">
+                        <thead>
+                            <tr class="text-capitalize bg-lightprimary">
                                 <th class="text-left">{{ t('USERNAME') }}</th>
-                                <th class="text-left">{{ t('OWNER') }}</th>
+                                <th class="text-left" v-if="isAdmin">{{ t('OWNER') }}</th>
                                 <th class="text-left">{{ t('GROUP') }}</th>
                                 <th class="text-left">RX / TX</th>
                                 <th class="text-left">{{ t('TRAFFIC') }}</th>
@@ -188,7 +191,7 @@ onMounted(() => {
                         <tbody>
                             <tr v-for="item in users" :key="item.username">
                                 <td>{{ item.username }}</td>
-                                <td>{{ item.owner || '' }}</td>
+                                <td v-if="isAdmin">{{ item.owner || '' }}</td>
                                 <td>{{ item.group }}</td>
                                 <td>
                                     <div>
@@ -346,3 +349,21 @@ onMounted(() => {
 
     <DeleteDialog :show="deleteDialog" :username="deleteUserName" @close="cancelDeleteUser" @deleteUser="deleteUser" />
 </template>
+
+<style scoped>
+tbody tr:nth-child(even) td {
+    background-color: #f5f5f5;
+}
+
+@media (min-width: 992px) {
+    tbody tr:nth-child(even) td {
+        background-color: #f5f5f5;
+    }
+    tbody tr:nth-child(even) td:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+    tbody tr:nth-child(even) td:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+}
+</style>

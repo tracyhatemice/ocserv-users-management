@@ -15,7 +15,7 @@ const logout = () => {
     profileStore.clearProfile();
     localStorage.removeItem('token');
     logoutDialog.value = false;
-    router.push({ name: 'Login' });
+    router.push({ name: 'Admin Login' });
 };
 </script>
 

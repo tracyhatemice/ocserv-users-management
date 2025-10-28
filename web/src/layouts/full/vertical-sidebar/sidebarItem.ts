@@ -18,9 +18,9 @@ export interface Menu {
     external?: boolean;
 }
 
-// export a function
 export function getSidebarItems(): Menu[] {
-    const { t } = useI18n(); // ✅ inside a function
+    const { t } = useI18n();
+    const profileStore = useProfileStore();
 
     let defaultSidebarItems: Menu[] = [
         { header: t('HOME') },
@@ -29,13 +29,19 @@ export function getSidebarItems(): Menu[] {
             icon: 'mdi-monitor-dashboard',
             to: '/'
         },
+        { header: 'OCSERV' }
+    ];
 
-        { header: 'OCSERV' },
-        {
+    if (profileStore.isAdmin) {
+        defaultSidebarItems.push({
             title: t('GROUP_DEFAULTS'),
             icon: 'mdi-router',
             to: '/ocserv/management/groups/defaults'
-        },
+        });
+    }
+
+    // These two always visible
+    defaultSidebarItems.push(
         {
             title: t('GROUPS'),
             icon: 'mdi-router-network',
@@ -46,37 +52,33 @@ export function getSidebarItems(): Menu[] {
             icon: 'mdi-account-network',
             to: '/ocserv/management/users'
         },
-
         {
             title: 'OCCTL',
             icon: 'mdi-console',
             to: '/ocserv/occtl'
-        },
-
-        { header: t('STATISTICS') },
-        {
-            title: t('STATISTICS'),
-            icon: 'mdi-chart-bar-stacked',
-            to: '/statistics'
-        },
-        {
-            title: t('BANDWIDTHS'),
-            icon: 'mdi-speedometer',
-            to: '/bandwidths'
-        },
-
-        { header: t('LOGS') },
-        {
-            title: t('SERVER'),
-            icon: 'mdi-server-network',
-            to: '/logs/server'
         }
-    ];
+    );
 
-    const profileStore = useProfileStore();
-
+    // Admin-only extra sections
     if (profileStore.isAdmin) {
-        const extraItems: Menu[] = [
+        defaultSidebarItems.push(
+            { header: t('STATISTICS') },
+            {
+                title: t('STATISTICS'),
+                icon: 'mdi-chart-bar-stacked',
+                to: '/statistics'
+            },
+            {
+                title: t('BANDWIDTHS'),
+                icon: 'mdi-speedometer',
+                to: '/bandwidths'
+            },
+            { header: t('LOGS') },
+            {
+                title: t('SERVER'),
+                icon: 'mdi-server-network',
+                to: '/logs/server'
+            },
             { header: t('STAFFS') },
             {
                 title: t('STAFFS'),
@@ -88,9 +90,7 @@ export function getSidebarItems(): Menu[] {
                 icon: 'mdi-history',
                 to: '/staffs/activities'
             }
-        ];
-
-        defaultSidebarItems = [...defaultSidebarItems, ...extraItems];
+        );
     }
 
     return defaultSidebarItems;

@@ -95,10 +95,10 @@ watch(
 <template>
     <v-form v-model="valid">
         <v-row align="center" justify="start">
-            <v-col cols="12" v-if="createData.name">
+            <v-col cols="12" v-if="!isUpdate || createData.name !== ''">
                 <h3 class="text-capitalize">{{ t('MAIN') }}</h3>
             </v-col>
-            <v-col cols="12" lg="4" md="6" v-if="createData.name">
+            <v-col cols="12" lg="4" md="6" v-if="!isUpdate || createData.name !== ''">
                 <v-label class="font-weight-bold mb-1 text-capitalize">{{ t('GROUP_NAME') }}</v-label>
                 <v-text-field
                     v-model="createData.name"

@@ -40,4 +40,10 @@ export interface ModelsOcservGroup {
      * @memberof ModelsOcservGroup
      */
     name: string;
+    /**
+     *
+     * @type {string}
+     * @memberof ModelsOcservGroup
+     */
+    owner: string;
 }

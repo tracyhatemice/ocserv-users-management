@@ -10,12 +10,12 @@ import { useSnackbarStore } from '@/stores/snackbar';
 
 const { t } = useI18n();
 const loading = ref(false);
-const defaults = ref<ModelsOcservGroup>({ config: undefined, name: '', id: 0 });
+const defaults = ref<ModelsOcservGroup>({ config: undefined, name: '', id: 0, owner: '' });
 const api = new OcservGroupsApi();
 
 const getGroupDefaults = () => {
     api.ocservGroupsDefaultsGet({ ...getAuthorization() }).then((res) => {
-        defaults.value = { config: res.data, name: '', id: 0 };
+        defaults.value = { config: res.data, name: '', id: 0, owner: '' };
     });
 };
 

@@ -146,9 +146,9 @@ onMounted(() => {
                 <v-progress-linear :active="loading" indeterminate></v-progress-linear>
 
                 <div v-if="!loading && staffs.length > 0">
-                    <v-table class="px-md-15" fixed-header striped="even">
-                        <thead class="text-capitalize">
-                            <tr>
+                    <v-table class="px-md-15">
+                        <thead>
+                            <tr class="text-capitalize bg-lightprimary">
                                 <th class="text-left">UID</th>
                                 <th class="text-left">{{ t('USERNAME') }}</th>
                                 <th class="text-left">{{ t('CREATED_AT') }}</th>
@@ -221,3 +221,21 @@ onMounted(() => {
 
     <DeleteDialog :show="deleteDialog" :username="staffName" @close="cancelDeleteStaff" @deleteStaff="deleteStaff" />
 </template>
+
+<style scoped>
+tbody tr:nth-child(even) td {
+    background-color: #f5f5f5;
+}
+
+@media (min-width: 992px) {
+    tbody tr:nth-child(even) td {
+        background-color: #f5f5f5;
+    }
+    tbody tr:nth-child(even) td:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+    tbody tr:nth-child(even) td:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+}
+</style>

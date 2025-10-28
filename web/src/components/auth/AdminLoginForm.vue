@@ -58,6 +58,7 @@ const isValid = computed(() => {
                     hide-details
                     variant="outlined"
                     @click:append-inner="showPassword = !showPassword"
+                    @keydown.enter="emit('signIn', data)"
                 />
             </v-col>
 
@@ -93,6 +94,7 @@ const isValid = computed(() => {
                     flat
                     size="large"
                     @click="emit('signIn', data)"
+
                 >
                     {{ t('SIGN_IN') }}
                 </v-btn>
