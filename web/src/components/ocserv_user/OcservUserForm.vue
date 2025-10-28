@@ -8,7 +8,7 @@ import {
     type OcservUserUpdateOcservUserData
 } from '@/api';
 import { useI18n } from 'vue-i18n';
-import { reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { requiredRule } from '@/utils/rules';
 import { formatDate } from '@/utils/convertors';
 import { getFormFields } from '@/components/ocserv_user/items';
@@ -129,6 +129,15 @@ const updateUser = () => {
     emit('updateUser', props.initData?.uid, updateData);
 };
 
+const expireAtDate = computed<Date>({
+    get: () => {
+        return createData.expire_at ? new Date(createData.expire_at) : new Date();
+    },
+    set: (val: Date) => {
+        createData.expire_at = formatDate(val);
+    }
+});
+
 watch(
     () => props.initData,
     () => {
@@ -229,7 +238,7 @@ watch(
                         />
                     </template>
                     <v-date-picker
-                        v-model="createData.expire_at"
+                        v-model="expireAtDate"
                         :header="t('EXPIRE_AT')"
                         elevation="24"
                         title=""

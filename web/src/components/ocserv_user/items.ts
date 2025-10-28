@@ -46,7 +46,7 @@ function getFormFields() {
             rules: [rules.ipOrRange]
         },
         {
-            key: 'restrict-user-to-ports',
+            key: 'restrict-to-ports',
             label: 'Restrict User To Ports',
             type: 'text',
             hint: t('ALLOWED_PORTS'),
@@ -72,7 +72,7 @@ function getFormFields() {
 
         // Access and Feature Controls
         {
-            key: 'restrict-user-to-routes',
+            key: 'restrict-to-routes',
             label: 'Restrict User To Routes',
             type: 'switch',
             hint: t('ALLOW_CLIENT_ACCESS_ONLY_TO_DEFINED_ROUTES')

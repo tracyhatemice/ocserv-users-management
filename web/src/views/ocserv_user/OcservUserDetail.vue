@@ -11,7 +11,12 @@ import { getAuthorization } from '@/utils/request';
 import { router } from '@/router';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import UiChildCard from '@/components/shared/UiChildCard.vue';
-import { formatDate, trafficTypesTransformer } from '@/utils/convertors';
+import {
+    formatDate,
+    formatDateTimeWithRelative,
+    formatDateWithRelative,
+    trafficTypesTransformer
+} from '@/utils/convertors';
 
 const props = defineProps<{ uid: string }>();
 
@@ -103,26 +108,26 @@ onMounted(() => {
                                 <v-row align="center" justify="start">
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600">UID:</span>
-                                        <span class="ms-1">{{ result.uid }}</span>
+                                        <span class="ms-1 text-primary">{{ result.uid }}</span>
                                     </v-col>
 
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize"> {{ t('OWNER') }}: </span>
-                                        <span class="ms-1 text-capitalize">{{ result.owner }}</span>
+                                        <span class="ms-1 text-capitalize text-primary">{{ result.owner }}</span>
                                     </v-col>
 
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize">
                                             {{ t('USERNAME') }}:
                                         </span>
-                                        <span class="ms-1">{{ result.username }}</span>
+                                        <span class="ms-1 text-primary">{{ result.username }}</span>
                                     </v-col>
 
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize">
                                             {{ t('PASSWORD') }}:
                                         </span>
-                                        <span v-if="showPassword" class="ms-1">{{ result.password }}</span>
+                                        <span v-if="showPassword" class="ms-1 text-primary">{{ result.password }}</span>
                                         <span v-else class="ms-1">
                                             {{ '*'.repeat(result.password?.length || 0) }}
                                             <v-icon class="mx-1" @click="showPassword = true">mdi-eye-outline</v-icon>
@@ -131,14 +136,14 @@ onMounted(() => {
 
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize">{{ t('GROUP') }}:</span>
-                                        <span class="ms-1">{{ result.group }}</span>
+                                        <span class="ms-1 text-primary">{{ result.group }}</span>
                                     </v-col>
 
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize">
                                             {{ t('TRAFFIC_TYPE') }}:
                                         </span>
-                                        <span class="ms-1 text-capitalize">
+                                        <span class="ms-1 text-capitalize text-primary">
                                             {{ trafficTypesTransformer(result.traffic_type) }}
                                         </span>
                                     </v-col>
@@ -147,25 +152,42 @@ onMounted(() => {
                                         <span class="font-medium text-gray-600 text-capitalize">
                                             {{ t('TRAFFIC_SIZE') }}:
                                         </span>
-                                        <span class="ms-1">{{ result.traffic_size || 0 }}</span>
+                                        <span class="ms-1 text-primary">
+                                            {{
+                                                result.traffic_size &&
+                                                result.traffic_type !== ModelsOcservUserTrafficTypeEnum.FREE
+                                                    ? result.traffic_size + ' GB'
+                                                    : t('FREE')
+                                            }}
+                                        </span>
                                     </v-col>
 
                                     <v-col cols="12" md="4">
-                                        <span class="font-medium text-gray-600 text-capitalize">
-                                            {{ t('EXPIRE_AT') }}:
-                                        </span>
-                                        <span v-if="result.expire_at" class="ms-1">
-                                            {{ formatDate(result.expire_at) }}
-                                        </span>
-                                        <span v-else class="ms-1 text-warning italic">{{ t('NOT_SET') }}</span>
+                                        <span class="font-medium text-gray-600 text-capitalize"> RX: </span>
+                                        <span class="ms-1 text-primary">{{ result.rx }} GB</span>
+                                    </v-col>
+
+                                    <v-col cols="12" md="4">
+                                        <span class="font-medium text-gray-600 text-capitalize"> TX: </span>
+                                        <span class="ms-1 text-primary">{{ result.tx }} GB</span>
                                     </v-col>
 
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize">
                                             {{ t('CREATED_AT') }}:
                                         </span>
-                                        <span v-if="result.created_at" class="ms-1">
-                                            {{ formatDate(result.created_at) }}
+                                        <span v-if="result.created_at" class="ms-1 text-primary">
+                                            {{ formatDateWithRelative(result.created_at, '') }}
+                                        </span>
+                                        <span v-else class="ms-1 text-warning italic">{{ t('NOT_SET') }}</span>
+                                    </v-col>
+
+                                    <v-col cols="12" md="4">
+                                        <span class="font-medium text-gray-600 text-capitalize">
+                                            {{ t('EXPIRE_AT') }}:
+                                        </span>
+                                        <span v-if="result.expire_at" class="ms-1 text-primary">
+                                            {{ formatDateWithRelative(result.expire_at, '') }}
                                         </span>
                                         <span v-else class="ms-1 text-warning italic">{{ t('NOT_SET') }}</span>
                                     </v-col>
@@ -174,30 +196,22 @@ onMounted(() => {
                                         <span class="font-medium text-gray-600 text-capitalize">
                                             {{ t('DEACTIVATED_AT') }}:
                                         </span>
-                                        <span v-if="result.deactivated_at" class="ms-1">
-                                            {{ formatDate(result.deactivated_at) }}
+                                        <span v-if="result.deactivated_at" class="ms-1 text-primary">
+                                            {{ formatDateWithRelative(result.deactivated_at, '') }}
                                         </span>
-                                        <span v-else class="ms-1 text-warning italic">{{ t('NOT_SET') }}</span>
+                                        <span v-else class="ms-1 text-info italic text-capitalize">
+                                            {{ t('USER_IS_ACTIVE_NOW') }}
+                                        </span>
                                     </v-col>
 
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize">
                                             {{ t('DESCRIPTION') }}:
                                         </span>
-                                        <span v-if="result.description" class="ms-1">
+                                        <span v-if="result.description" class="ms-1 text-primary">
                                             {{ result.description }}
                                         </span>
                                         <span v-else class="ms-1 text-warning italic">{{ t('NOT_SET') }}</span>
-                                    </v-col>
-
-                                    <v-col cols="12" md="4">
-                                        <span class="font-medium text-gray-600 text-capitalize"> RX: </span>
-                                        <span class="ms-1">{{ result.rx }} GB</span>
-                                    </v-col>
-
-                                    <v-col cols="12" md="4">
-                                        <span class="font-medium text-gray-600 text-capitalize"> TX: </span>
-                                        <span class="ms-1">{{ result.tx }} GB</span>
                                     </v-col>
                                 </v-row>
                                 <div></div>
@@ -221,7 +235,7 @@ onMounted(() => {
                                 >
                                     <span v-if="!Array.isArray(val)">
                                         <span class="w-40 font-medium text-gray-600">{{ key }}: </span>
-                                        <span v-if="val">{{ val }}</span>
+                                        <span v-if="val" class="text-primary">{{ val }}</span>
                                         <span v-else class="text-warning italic">{{ t('NOT_SET') }}</span>
                                     </span>
                                 </v-col>
@@ -245,7 +259,7 @@ onMounted(() => {
                                                 v-for="(v, index) in val"
                                                 v-if="Array.isArray(val)"
                                                 :key="index"
-                                                class="mx-1"
+                                                class="mx-1 text-primary"
                                             >
                                                 {{ v }} <br />
                                             </span>

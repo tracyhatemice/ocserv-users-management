@@ -229,7 +229,7 @@ onMounted(() => {
                                     <div>
                                         {{ t('DEACTIVATED_AT') }}:
                                         <span class="text-info text-capitalize">
-                                            {{ formatDate(item.deactivated_at) || t('IS_ACTIVE_YET') }}
+                                            {{ formatDate(item.deactivated_at) || t('USER_IS_ACTIVE_NOW') }}
                                         </span>
                                     </div>
                                 </td>
@@ -244,8 +244,8 @@ onMounted(() => {
 
                                         <!-- Disconnected -->
                                         <span v-else-if="!item.is_online" class="ml-2">
-                                            <v-icon color="grey">mdi-lan-disconnect</v-icon>
-                                            <span class="text-grey text-capitalize ml-2">{{ t('DISCONNECTED') }}</span>
+                                            <v-icon color="error">mdi-lan-disconnect</v-icon>
+                                            <span class="text-error text-capitalize ml-2">{{ t('DISCONNECTED') }}</span>
                                         </span>
 
                                         <!-- Online -->

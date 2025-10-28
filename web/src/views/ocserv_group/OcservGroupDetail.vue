@@ -81,11 +81,11 @@ onMounted(() => {
                                 <v-row align="center" justify="start">
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600">ID :</span>
-                                        <span class="ml-2 me-15">{{ result.id }}</span>
+                                        <span class="ml-2 me-15 text-primary">{{ result.id }}</span>
                                     </v-col>
                                     <v-col cols="12" md="4">
                                         <span class="font-medium text-gray-600 text-capitalize">{{ t('NAME') }}:</span>
-                                        <span class="ml-2">{{ result.name }}</span>
+                                        <span class="ml-2 text-primary">{{ result.name }}</span>
                                     </v-col>
                                 </v-row>
                             </div>

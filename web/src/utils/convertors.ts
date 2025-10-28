@@ -84,6 +84,42 @@ const formatDateTimeWithRelative = (dateString: string | undefined, message: str
     return `${formatted} (${relative})`;
 };
 
+const formatDateWithRelative = (dateString: string | undefined, message: string | undefined): string => {
+    if (!dateString) {
+        return message || '';
+    }
+
+    const { t } = useI18n();
+    const date = new Date(dateString);
+    const now = new Date();
+
+    // Strip time to compare only dates
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const diffTime = nowOnly.getTime() - dateOnly.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    let relative = '';
+
+    if (diffDays === 0) {
+        relative = t('TODAY');
+    } else if (diffDays === 1) {
+        relative = t('YESTERDAY');
+    } else if (diffDays === -1) {
+        relative = t('TOMORROW');
+    } else if (diffDays > 1) {
+        relative = `${diffDays} ${t('DAYS_AGO')}`;
+    } else if (diffDays < -1) {
+        relative = `in ${Math.abs(diffDays)} ${t('DAYS')}`;
+    }
+
+    // Format date only (e.g., YYYY-MM-DD)
+    const formatted = formatDate(dateString);
+
+    return `${formatted} (${relative})`;
+};
+
 const trafficTypesTransformer = (item: ModelsOcservUserTrafficTypeEnum): string => {
     const { t } = useI18n();
 
@@ -118,6 +154,7 @@ export {
     formatDateTime,
     formatDate,
     formatDateTimeWithRelative,
+    formatDateWithRelative,
     trafficTypesTransformer,
     numberToFixer,
     toISODateString
