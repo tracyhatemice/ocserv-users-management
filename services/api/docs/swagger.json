@@ -2170,7 +2170,8 @@
         "models.OcservGroup": {
             "type": "object",
             "required": [
-                "name"
+                "name",
+                "owner"
             ],
             "properties": {
                 "config": {
@@ -2180,6 +2181,9 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "owner": {
                     "type": "string"
                 }
             }

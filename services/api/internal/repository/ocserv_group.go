@@ -18,8 +18,8 @@ type OcservGroupRepository struct {
 }
 
 type OcservGroupRepositoryInterface interface {
-	Groups(ctx context.Context, pagination *request.Pagination) (*[]models.OcservGroup, int64, error)
-	GroupsLookup(ctx context.Context) ([]string, error)
+	Groups(ctx context.Context, pagination *request.Pagination, owner string) (*[]models.OcservGroup, int64, error)
+	GroupsLookup(ctx context.Context, owner string) ([]string, error)
 	GetByID(ctx context.Context, id string) (*models.OcservGroup, error)
 	Create(ctx context.Context, ocservGroup *models.OcservGroup) (*models.OcservGroup, error)
 	Update(ctx context.Context, ocservGroup *models.OcservGroup) (*models.OcservGroup, error)
@@ -37,28 +37,42 @@ func NewOcservGroupRepository() *OcservGroupRepository {
 }
 
 func (o *OcservGroupRepository) Groups(
-	ctx context.Context, pagination *request.Pagination,
+	ctx context.Context, pagination *request.Pagination, owner string,
 ) (*[]models.OcservGroup, int64, error) {
 	var totalRecords int64
 
-	err := o.db.WithContext(ctx).Model(&models.OcservGroup{}).Count(&totalRecords).Error
+	totalQuery := o.db.WithContext(ctx).Model(&models.OcservGroup{})
+	if owner != "" {
+		totalQuery = totalQuery.Where("owner = ?", owner)
+	}
+	err := totalQuery.Count(&totalRecords).Error
 	if err != nil {
 		return nil, 0, err
 	}
 
 	var ocservGroups []models.OcservGroup
 	txPaginator := request.Paginator(ctx, o.db, pagination)
-	err = txPaginator.Model(&ocservGroups).Find(&ocservGroups).Error
+
+	query := txPaginator.Model(&ocservGroups)
+	if owner != "" {
+		query = query.Where("owner = ?", owner)
+	}
+	err = query.Find(&ocservGroups).Error
 	if err != nil {
 		return nil, 0, err
 	}
 	return &ocservGroups, totalRecords, nil
 }
 
-func (o *OcservGroupRepository) GroupsLookup(ctx context.Context) ([]string, error) {
+func (o *OcservGroupRepository) GroupsLookup(ctx context.Context, owner string) ([]string, error) {
 	var ocservGroups []models.OcservGroup
 
-	err := o.db.WithContext(ctx).Model(&models.OcservGroup{}).Select("name").Find(&ocservGroups).Error
+	query := o.db.WithContext(ctx).Model(&models.OcservGroup{})
+	if owner != "" {
+		query = query.Where("owner = ?", owner)
+	}
+
+	err := query.Select("name").Find(&ocservGroups).Error
 	if err != nil {
 		return nil, err
 	}

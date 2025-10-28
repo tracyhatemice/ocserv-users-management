@@ -62,7 +62,12 @@ func (o *OcservUserRepository) Users(
 ) (*[]models.OcservUser, int64, error) {
 	var totalRecords int64
 
-	err := o.db.WithContext(ctx).Model(&models.OcservUser{}).Count(&totalRecords).Error
+	totalQuery := o.db.WithContext(ctx).Model(&models.OcservUser{})
+	if owner != "" {
+		totalQuery = totalQuery.Where("owner = ?", owner)
+	}
+	err := totalQuery.Count(&totalRecords).Error
+	
 	if err != nil {
 		return nil, 0, err
 	}

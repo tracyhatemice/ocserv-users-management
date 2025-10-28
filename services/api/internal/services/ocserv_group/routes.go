@@ -14,6 +14,6 @@ func Routes(e *echo.Group) {
 	g.POST("", ctl.CreateOcservGroup)
 	g.PATCH("/:id", ctl.UpdateOcservGroup)
 	g.DELETE("/:id", ctl.DeleteOcservGroup)
-	g.GET("/defaults", ctl.GetDefaultsGroup)
-	g.PATCH("/defaults", ctl.UpdateDefaultsGroup)
+	g.GET("/defaults", ctl.GetDefaultsGroup, middlewares.AdminPermission())
+	g.PATCH("/defaults", ctl.UpdateDefaultsGroup, middlewares.AdminPermission())
 }

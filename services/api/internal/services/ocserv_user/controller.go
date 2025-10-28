@@ -46,13 +46,11 @@ func New() *Controller {
 // @Router       /ocserv/users [get]
 func (ctl *Controller) OcservUsers(c echo.Context) error {
 	owner := ""
-
 	if isAdmin := c.Get("isAdmin").(bool); !isAdmin {
 		username := c.Get("username").(string)
 		if username == "" {
 			return ctl.request.BadRequest(c, errors.New("invalid user uid"))
 		}
-
 		owner = username
 	}
 

@@ -2177,7 +2177,8 @@ const docTemplate = `{
         "models.OcservGroup": {
             "type": "object",
             "required": [
-                "name"
+                "name",
+                "owner"
             ],
             "properties": {
                 "config": {
@@ -2187,6 +2188,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "owner": {
                     "type": "string"
                 }
             }
