@@ -97,6 +97,8 @@ func ActiveMonthlyUsers(ctx context.Context, db *gorm.DB) {
 
 	if len(users) > 0 {
 		for _, user := range users {
+			user.Rx = 0
+			user.Tx = 0
 			user.DeactivatedAt = nil
 			user.IsLocked = false
 			db.WithContext(ctx).Save(&user)

@@ -30,7 +30,7 @@ func CalculateUserStats(ctx context.Context, stream <-chan string) {
 	for s := range stream {
 		u, err := extractUser(s)
 		if err != nil {
-
+			log.Println("Error extracting user stats: ", err)
 			continue
 		}
 
