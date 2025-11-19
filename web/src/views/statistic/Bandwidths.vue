@@ -36,13 +36,13 @@ const search = (dateStart: string, dateEnd: string) => {
     });
 };
 
-const rxtxPercentage = computed(() => {
+const txPercentage = computed(() => {
     const rx = result.value.rx ?? 0;
     const tx = result.value.tx ?? 0;
     const total = rx + tx;
 
     if (total === 0) return 0;
-    return Math.round((rx / total) * 100);
+    return Math.round((tx / total) * 100);
 });
 </script>
 
@@ -60,16 +60,16 @@ const rxtxPercentage = computed(() => {
                             <h6 class="text-h6 text-capitalize text-body-1">
                                 {{ t('TOTAL') }} TX:
                                 <br />
-                                <span class="text-muted"> {{ numberToFixer(result.tx) }} GB </span>
+                                <span class="text-muted"> {{ numberToFixer(result.tx, 6) }} GB </span>
                             </h6>
                             <h6 class="text-h6 text-capitalize text-body-1 mt-5">
                                 {{ t('TOTAL') }} RX:
                                 <br />
-                                <span class="text-muted text-body-1"> {{ numberToFixer(result.rx) }} GB </span>
+                                <span class="text-muted text-body-1"> {{ numberToFixer(result.rx, 6) }} GB </span>
                             </h6>
                             <h6 class="text-h6 text-capitalize text-body-1 mt-5">
-                                {{ t('AVERAGE') }}:
-                                <span class="text-muted text-body-1"> {{ rxtxPercentage }}% </span>
+                                {{ t('AVERAGE') }} (TX):
+                                <span class="text-muted text-body-1"> {{ txPercentage }}% </span>
                             </h6>
                         </v-col>
 

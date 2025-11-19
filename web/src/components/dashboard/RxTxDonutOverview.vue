@@ -47,16 +47,16 @@ const chartOptions = computed(() => {
         tooltip: { theme: 'light', fillSeriesColor: false }
     };
 });
-const rxtxPercentage = computed(() => {
+const txPercentage = computed(() => {
     const rx = props.totalBandwidths?.rx ?? 0;
     const tx = props.totalBandwidths?.tx ?? 0;
     const total = rx + tx;
 
     if (total === 0) return 0;
-    return Math.round((rx / total) * 100);
+    return Math.round((tx / total) * 100);
 });
 
-const chart = computed(() => [+props.totalBandwidths?.tx.toFixed(4) || 0, +props.totalBandwidths?.rx.toFixed(4) || 0]);
+const chart = computed(() => [+props.totalBandwidths?.tx.toFixed(6) || 0, +props.totalBandwidths?.rx.toFixed(6) || 0]);
 </script>
 <template>
     <v-card elevation="10">
@@ -70,18 +70,18 @@ const chart = computed(() => [+props.totalBandwidths?.tx.toFixed(4) || 0, +props
                         <h6 class="text-h6 text-capitalize text-body-1">
                             {{ t('TOTAL') }} TX:
                             <br />
-                            <span class="text-muted"> {{ numberToFixer(props.totalBandwidths?.tx) }} GB </span>
+                            <span class="text-muted"> {{ numberToFixer(props.totalBandwidths?.tx, 6) }} GB </span>
                         </h6>
                         <h6 class="text-h6 text-capitalize text-body-1">
                             {{ t('TOTAL') }} RX:
                             <br />
                             <span class="text-muted text-body-1">
-                                {{ numberToFixer(props.totalBandwidths?.rx) }} GB
+                                {{ numberToFixer(props.totalBandwidths?.rx, 6) }} GB
                             </span>
                         </h6>
                         <h6 class="text-h6 text-capitalize text-body-1 mt-5">
-                            {{ t('AVERAGE') }}:
-                            <span class="text-muted text-body-1"> {{ rxtxPercentage }}% </span>
+                            {{ t('AVERAGE') }} (TX):
+                            <span class="text-muted text-body-1"> {{ txPercentage }}% </span>
                         </h6>
                         <div class="d-flex align-center mt-sm-10 mt-8">
                             <h6 class="text-subtitle-1 text-muted">

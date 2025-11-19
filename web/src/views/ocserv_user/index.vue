@@ -181,8 +181,8 @@ onMounted(() => {
                                 <th class="text-left">{{ t('USERNAME') }}</th>
                                 <th class="text-left" v-if="isAdmin">{{ t('OWNER') }}</th>
                                 <th class="text-left">{{ t('GROUP') }}</th>
-                                <th class="text-left">RX / TX</th>
                                 <th class="text-left">{{ t('TRAFFIC') }}</th>
+                                <th class="text-left">{{ t('BANDWIDTHS') }}</th>
                                 <th class="text-left">{{ t('DATES') }}</th>
                                 <th class="text-left">{{ t('STATUS') }}</th>
                                 <th class="text-left">{{ t('ACTION') }}</th>
@@ -193,44 +193,58 @@ onMounted(() => {
                                 <td>{{ item.username }}</td>
                                 <td v-if="isAdmin">{{ item.owner || '' }}</td>
                                 <td>{{ item.group }}</td>
-                                <td>
-                                    <div>
-                                        RX: <span class="text-info">{{ bytesToGB(item.rx, 4) }} GB</span>
-                                    </div>
-                                    <div>
-                                        TX: <span class="text-info">{{ bytesToGB(item.tx, 4) }} GB</span>
-                                    </div>
-                                </td>
                                 <td class="text-capitalize">
                                     <div>
-                                        {{ t('TRAFFIC_TYPE') }}:
-                                        <span class="text-info text-capitalize ml-2">
+                                        {{ t('TRAFFIC_TYPE') }}:<br />
+                                        <span class="text-info text-capitalize">
                                             {{ trafficTypesTransformer(item.traffic_type) }}
                                         </span>
                                     </div>
                                     <div>
-                                        {{ t('TRAFFIC_SIZE') }}:
+                                        {{ t('TRAFFIC_SIZE') }}:<br />
                                         <span
                                             v-if="item.traffic_type != ModelsOcservUserTrafficTypeEnum.FREE"
-                                            class="text-info text-capitalize ml-2"
+                                            class="text-info text-capitalize"
                                         >
                                             {{ item.traffic_size }} GB
                                         </span>
 
-                                        <span v-else class="text-info text-capitalize ml-2">
+                                        <span v-else class="text-info text-capitalize">
                                             {{ t('FREE') }}
                                         </span>
                                     </div>
                                 </td>
+                                <td style="cursor: pointer">
+                                    <div>
+                                        RX: <br />
+                                        <v-tooltip :text="`${item.rx.toLocaleString()} bytes`">
+                                            <template #activator="{ props }">
+                                                <span v-bind="props" class="text-info">
+                                                    {{ bytesToGB(item.rx, 4) }} GB
+                                                </span>
+                                            </template>
+                                        </v-tooltip>
+                                    </div>
+                                    <div>
+                                        TX: <br />
+                                        <v-tooltip :text="`${item.tx.toLocaleString()} bytes`">
+                                            <template #activator="{ props }">
+                                                <span v-bind="props" class="text-info">
+                                                    {{ bytesToGB(item.tx, 4) }} GB
+                                                </span>
+                                            </template>
+                                        </v-tooltip>
+                                    </div>
+                                </td>
                                 <td class="text-capitalize">
                                     <div>
-                                        {{ t('EXPIRE_AT') }}:
+                                        {{ t('EXPIRE_AT') }}:<br />
                                         <span class="text-info text-capitalize">
                                             {{ formatDate(item.expire_at) }}
                                         </span>
                                     </div>
                                     <div>
-                                        {{ t('DEACTIVATED_AT') }}:
+                                        {{ t('DEACTIVATED_AT') }}:<br />
                                         <span class="text-info text-capitalize">
                                             {{ formatDate(item.deactivated_at) || t('USER_IS_ACTIVE_NOW') }}
                                         </span>
@@ -238,23 +252,23 @@ onMounted(() => {
                                 </td>
                                 <td>
                                     <div class="text-capitalize">
-                                        {{ t('STATUS') }}:
+                                        {{ t('STATUS') }}:<br />
                                         <!-- Locked -->
-                                        <span v-if="item.is_locked" class="ml-2">
+                                        <span v-if="item.is_locked">
                                             <v-icon color="warning">mdi-lock</v-icon>
-                                            <span class="text-warning text-capitalize ml-2">{{ t('LOCKED') }}</span>
+                                            <span class="text-warning text-capitalize">{{ t('LOCKED') }}</span>
                                         </span>
 
                                         <!-- Disconnected -->
-                                        <span v-else-if="!item.is_online" class="ml-2">
+                                        <span v-else-if="!item.is_online">
                                             <v-icon color="error">mdi-lan-disconnect</v-icon>
-                                            <span class="text-error text-capitalize ml-2">{{ t('DISCONNECTED') }}</span>
+                                            <span class="text-error text-capitalize">{{ t('DISCONNECTED') }}</span>
                                         </span>
 
                                         <!-- Online -->
-                                        <span v-else class="ml-2">
+                                        <span v-else>
                                             <v-icon color="success">mdi-lan-connect</v-icon>
-                                            <span class="text-success text-capitalize ml-2">{{ t('ONLINE') }}</span>
+                                            <span class="text-success text-capitalize">{{ t('ONLINE') }}</span>
                                         </span>
                                     </div>
                                 </td>

@@ -47,7 +47,7 @@ const donutOptions = computed(() => {
     };
 });
 
-const chart = computed(() => [+props.totalBandwidths?.tx.toFixed(4) || 0, +props.totalBandwidths?.rx.toFixed(4) || 0]);
+const chart = computed(() => [+props.totalBandwidths?.tx.toFixed(6) || 0, +props.totalBandwidths?.rx.toFixed(6) || 0]);
 </script>
 
 <template>

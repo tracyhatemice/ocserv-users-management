@@ -3,7 +3,12 @@ import { useI18n } from 'vue-i18n';
 
 const bytesToGB = (bytes: number, fixture: number = 6): string => {
     if (bytes === 0) return '0';
-    return (bytes / 1024 ** 3).toFixed(fixture); // returns GB as a string with 6 decimal places
+
+    let result = bytes / 1024 ** 3;
+    if (result < 1 / fixture) {
+        return '0';
+    }
+    return result.toFixed(fixture); // returns GB as a string with 6 decimal places
 };
 
 const formatDateTime = (dateString: string | undefined, message: string | undefined): string => {
