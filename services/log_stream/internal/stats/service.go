@@ -47,8 +47,10 @@ func (s *StatService) CalculateUserStats() {
 			}
 
 			cleanMsg := strings.TrimSpace(msg) // remove whitespace/newlines and normalize case
-			
-			if strings.Contains(cleanMsg, "server shutdown complete") {
+
+			log.Println("msg received: ", cleanMsg)
+
+			if strings.Contains(cleanMsg, "user disconnected") {
 				u, err := s.extractUser(cleanMsg)
 				if err != nil {
 					log.Printf("Error extracting user stats from msg: %q, err: %v", cleanMsg, err)

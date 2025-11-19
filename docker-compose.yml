@@ -78,6 +78,6 @@ services:
       - shared-app
     depends_on:
       - ocserv
-      - stream_log
+      - log_stream
     restart: unless-stopped
 

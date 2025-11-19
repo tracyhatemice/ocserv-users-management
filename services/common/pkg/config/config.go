@@ -41,6 +41,7 @@ func Init(debug bool, host string, port int) {
 		JWTSecret:    jwtSecret,
 		AllowOrigins: strings.Split(allowOrigins, ","),
 	}
+	log.Println("AllowOrigins: ", cfg.AllowOrigins)
 }
 
 func Get() *Config {

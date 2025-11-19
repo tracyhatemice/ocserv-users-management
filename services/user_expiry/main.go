@@ -6,6 +6,7 @@ import (
 	"github.com/mmtaee/ocserv-users-management/common/models"
 	"github.com/mmtaee/ocserv-users-management/common/ocserv/occtl"
 	"github.com/mmtaee/ocserv-users-management/common/ocserv/user"
+	"github.com/mmtaee/ocserv-users-management/common/pkg/config"
 	"github.com/mmtaee/ocserv-users-management/common/pkg/database"
 	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
@@ -29,6 +30,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
+	config.Init(debug, "", 8888)
 	database.Connect()
 
 	go func() {
@@ -90,7 +92,7 @@ func ExpireUsers(ctx context.Context, db *gorm.DB) {
 	}
 
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 10) // semaphore to limit concurrency 10 users
+	sem := make(chan struct{}, 10)
 
 	for _, u := range users {
 		wg.Add(1)
@@ -100,30 +102,30 @@ func ExpireUsers(ctx context.Context, db *gorm.DB) {
 			defer wg.Done()
 			defer func() { <-sem }()
 
-			err = db.Model(&u).Updates(map[string]interface{}{
+			// Update DB user
+			if err2 := db.Model(&u).Updates(map[string]interface{}{ // CHANGED: using &u (copied)
 				"deactivated_at": time.Now(),
 				"is_locked":      true,
-			}).Error
-			if err != nil {
-				log.Printf("Failed to update user %s: %v", u.Username, err)
+			}).Error; err2 != nil {
+				log.Printf("Failed to update user %s: %v", u.Username, err2)
 				return
 			}
 
 			// Disconnect user from ocserv
-			_, err = occtlHandler.DisconnectUser(u.Username)
-			if err != nil {
-				log.Printf("Failed to disconnect user: %v", err)
+			if _, err2 := occtlHandler.DisconnectUser(u.Username); err2 != nil {
+				log.Printf("Failed to disconnect user %s: %v", u.Username, err2)
 				return
 			}
 
 			// Lock user in ocserv
-			_, err = ocservUserHandler.Lock(u.Username)
-			if err != nil {
-				log.Printf("Failed to lock user: %v", err)
+			if _, err2 := ocservUserHandler.Lock(u.Username); err2 != nil {
+				log.Printf("Failed to lock user %s: %v", u.Username, err2)
 				return
 			}
+
 		}(u)
 	}
+
 	wg.Wait()
 }
 
@@ -140,14 +142,13 @@ func ActiveMonthlyUsers(ctx context.Context, db *gorm.DB) {
 			models.MonthlyTransmit,
 		}).
 		Find(&users).Error
-
 	if err != nil {
 		log.Printf("Failed to find users: %v", err)
 		return
 	}
 
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 10) // semaphore to limit concurrency 10 users
+	sem := make(chan struct{}, 10)
 
 	for _, u := range users {
 		wg.Add(1)
@@ -157,21 +158,22 @@ func ActiveMonthlyUsers(ctx context.Context, db *gorm.DB) {
 			defer wg.Done()
 			defer func() { <-sem }()
 
-			err = db.Model(&u).Updates(map[string]interface{}{
+			if err2 := db.Model(&u).Updates(map[string]interface{}{
 				"rx":             0,
 				"tx":             0,
 				"deactivated_at": nil,
 				"is_locked":      false,
-			}).Error
-			if err != nil {
-				log.Printf("Failed to activate user %s: %v", u.Username, err)
+			}).Error; err2 != nil {
+				log.Printf("Failed to activate user %s: %v", u.Username, err2)
 				return
 			}
 
-			if _, err = ocservUserHandler.UnLock(u.Username); err != nil {
-				log.Printf("Failed to unlock user %s: %v", u.Username, err)
+			if _, err2 := ocservUserHandler.UnLock(u.Username); err2 != nil {
+				log.Printf("Failed to unlock user %s: %v", u.Username, err2)
 			}
+
 		}(u)
 	}
+
 	wg.Wait()
 }

@@ -5,7 +5,7 @@
 # ==============================================================
 #
 # Description:
-#  - Builds Go services (api, stream_log) and installs them into /opt/ocserv_user_management
+#  - Builds Go services (api, log_stream) and installs them into /opt/ocserv_user_management
 #  - Creates and enables systemd service units
 #  - Builds frontend (npm + Vite) and deploys to /var/www/site
 #  - Installs and configures Nginx with self-signed SSL and reverse proxy
@@ -16,7 +16,7 @@
 #
 # Prerequisites:
 #  - Debian 12+ (or Ubuntu) with apt
-#  - Git repo with `api`, `stream_log`, and `web/` directories
+#  - Git repo with `api`, `log_stream`, and `web/` directories
 #  - Optional environment variables:
 #       SSL_EXPIRE, SSL_C, SSL_ST, SSL_L, SSL_ORG, SSL_OU, SSL_CN
 #       OC_NET, OCSERV_PORT, OCSERV_DNS, ETH
@@ -90,7 +90,8 @@ sudo apt install -y gcc curl openssl ca-certificates jq less build-essential lib
 # -----------------------
 declare -A SERVICES=(
   ["api"]="./services/api"
-  ["stream_log"]="./services/stream_log"
+  ["log_stream"]="./services/log_stream"
+  ["user_expiry"]="./services/user_expiry"
 )
 
 # -----------------------
@@ -138,7 +139,8 @@ for service in "${!SERVICES[@]}"; do
   binary="${BIN_DIR}/${service}"
   case "$service" in
     api)        ARGS="serve --host 127.0.0.1 --port 8080" ;;
-    stream_log) ARGS="-h 127.0.0.1 -p 8081 --systemd" ;;
+    log_stream) ARGS="-h 127.0.0.1 -p 8081 --systemd" ;;
+    user_expiry) ARGS="" ;;
     *)          ARGS="" ;;
   esac
 
@@ -243,7 +245,7 @@ fi
 # Nginx reverse proxy (HTTP redirect :3000 -> :3443; TLS on :3443)
 sudo tee /etc/nginx/conf.d/site.conf >/dev/null <<'EOF'
 upstream api_backend { server 127.0.0.1:8080; }
-upstream stream_log_backend { server 127.0.0.1:8081; }
+upstream log_stream_backend { server 127.0.0.1:8081; }
 
 server {
     listen 3000;
@@ -272,7 +274,7 @@ server {
     }
 
     location /ws/ {
-        proxy_pass http://stream_log_backend/;
+        proxy_pass http://log_stream_backend/;
         proxy_http_version 1.1;
     
         # Keep the connection open for SSE

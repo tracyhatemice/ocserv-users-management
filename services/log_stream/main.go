@@ -110,20 +110,23 @@ func start(ctx context.Context, streamText <-chan string, broadcaster, lineLogCh
 				return
 			}
 			// Send to broadcaster
-			select {
-			case broadcaster <- line:
-			case <-ctx.Done():
-				return
-			default:
-				// skip log, continue
-			}
+			go func(l string) {
+				select {
+				case broadcaster <- l:
+				case <-ctx.Done():
+					return
+				default:
+					// skip log, continue
+				}
+			}(line)
 
 			// Send to lineLogChan
-			select {
-			case lineLogChan <- line:
-			case <-ctx.Done():
-				return
-			}
+			go func(l string) {
+				select {
+				case lineLogChan <- l:
+				case <-ctx.Done():
+				}
+			}(line)
 		}
 	}
 }
