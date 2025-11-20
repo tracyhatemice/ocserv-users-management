@@ -205,6 +205,12 @@ else
     ok "Node.js is already installed: v$CURRENT_NODE_VERSION"
 fi
 
+# Ensure npm exists
+if ! command -v npm >/dev/null 2>&1; then
+    warn "npm not found. Installing npm..."
+    sudo apt-get install -y npm
+fi
+
 sudo npm install -g yarn
 
 # -----------------------
@@ -473,3 +479,12 @@ else
 fi
 
 ok "Deployment completed successfully!"
+
+# -----------------------
+# Cleaning
+# -----------------------
+log "Cleaning unused packages..."
+
+sudo apt autoremove
+
+ok "Cleaning completed."
