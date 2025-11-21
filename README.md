@@ -135,6 +135,40 @@ Check it out to see what's coming next!
 
 ---
 
+## 🌍 Contributing to Translations (i18n)
+
+We welcome community contributions to improve and expand internationalization (i18n) support!
+
+### 📁 Translation Files Directory
+All web dashboard translation files are located at:
+
+[web/src/locales/](https://github.com/mmtaee/ocserv-dashboard/tree/master/web/src/locales)
+
+Each language has its own JSON file (e.g., `en.json`, `zh.json`, `ru.json`, etc.).
+
+### 🛠️ How to Contribute
+
+1. Go to the [locales](https://github.com/mmtaee/ocserv-dashboard/tree/master/web/src/locales) directory.
+2. Choose an existing language file to improve, or create a new `<lang>.json` file for a new language.
+3. Add all required translation keys with proper JSON structure.
+4. Make sure the JSON syntax is valid.
+
+### 🔧 Update the Installer (Required for New Languages)
+
+After adding a new `<lang>.json` file, you **must update the `install.sh` file**:
+
+Open 👉 [install.sh](https://github.com/mmtaee/ocserv-dashboard/blob/master/install.sh)
+
+Find the line that defines supported languages, and add your new language in the same format, comma-separated.
+
+Example (adding Spanish):
+
+**LANGUAGES=en:English,zh:中文,ru:Русский,fa:فارسی,ar:العربية,es:Español**
+
+Contributing translations and updating the installer helps ensure the dashboard supports users around the world.
+
+---
+
 ## 📦 License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
