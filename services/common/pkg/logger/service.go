@@ -16,6 +16,10 @@ func Init(ctx context.Context, bufferSize int) {
 	go l.worker(ctx)
 }
 
+func GetLogger() *Logger {
+	return Log
+}
+
 func (l *Logger) worker(ctx context.Context) {
 	for {
 		select {
@@ -48,7 +52,7 @@ func (l *Logger) print(msg LogMessage) {
 	)
 }
 
-func safeSprintf(format string, args ...interface{}) (result string) {
+func SafeSprintf(format string, args ...interface{}) (result string) {
 	defer func() {
 		if r := recover(); r != nil {
 			// fallback message if formatting fails
@@ -67,25 +71,25 @@ func send(level LogLevel, message string) {
 			Message: message,
 			Time:    time.Now(),
 		}:
-			//default:
+		default:
 			// optional: drop message if buffer full
 		}
 	}
 }
 
 func Info(format string, args ...interface{}) {
-	send(InfoLevel, safeSprintf(format, args...))
+	send(InfoLevel, SafeSprintf(format, args...))
 }
 
 func Warn(format string, args ...interface{}) {
-	send(WarnLevel, safeSprintf(format, args...))
+	send(WarnLevel, SafeSprintf(format, args...))
 }
 
 func Error(format string, args ...interface{}) {
-	send(ErrorLevel, safeSprintf(format, args...))
+	send(ErrorLevel, SafeSprintf(format, args...))
 }
 
 func Fatal(format string, args ...interface{}) {
-	send(FatalLevel, safeSprintf(format, args...))
+	send(FatalLevel, SafeSprintf(format, args...))
 	os.Exit(1)
 }
