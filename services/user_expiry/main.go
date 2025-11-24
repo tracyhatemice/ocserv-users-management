@@ -27,7 +27,9 @@ func main() {
 
 	cronService := service.NewCornService()
 
+	logger.Info("Start checking missing cron jobs")
 	cronService.MissedCron()
+	logger.Info("Checking missing cron jobs completed")
 
 	go func() {
 		cronService.UserExpiryCron(ctx)

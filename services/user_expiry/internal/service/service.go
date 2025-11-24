@@ -10,7 +10,6 @@ import (
 	stateManager "github.com/mmtaee/ocserv-users-management/user_expiry/pkg/state"
 	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
-	"log"
 	"sync"
 	"time"
 )
@@ -31,16 +30,22 @@ func (c *CornService) MissedCron() {
 	db := database.GetConnection()
 
 	state := stateManager.NewCronState()
-	today := time.Now().Truncate(24 * time.Hour)
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	lastRun := state.DailyLastRun.Truncate(24 * time.Hour)
 
 	// daily missed job
-	if state.DailyLastRun.IsZero() || state.DailyLastRun.Before(today) {
+	logger.Info("Start checking missing daily cron jobs")
+	if state.DailyLastRun.IsZero() || lastRun.Before(today) {
 		logger.Info("Running missed DAILY cron...")
 		c.ExpireUsers(context.Background(), db)
 		state.DailyLastRun = today
+	} else {
+		logger.Info("Daily cron already ran today, skipping.")
 	}
+	logger.Info("Checking missing daily cron jobs completed")
 
 	// monthly missed job
+	logger.Info("start checking missing monthly cron jobs completed")
 	firstDay := today.Day() == 1
 	newMonth := state.MonthlyLastRun.IsZero() || state.MonthlyLastRun.Month() != today.Month()
 
@@ -49,10 +54,12 @@ func (c *CornService) MissedCron() {
 		c.ActiveMonthlyUsers(context.Background(), db)
 		state.MonthlyLastRun = today
 	}
+	logger.Info("Checking missing monthly cron jobs completed")
 
 	if err := state.Save(); err != nil {
 		logger.Fatal("Failed to save state: %v", err)
 	}
+	logger.Info("Saving missing cron jobs completed")
 }
 
 func (c *CornService) UserExpiryCron(ctx context.Context) {
@@ -88,7 +95,7 @@ func (c *CornService) UserExpiryCron(ctx context.Context) {
 		logger.Fatal("Failed to add cron job: %v", err)
 	}
 
-	log.Println("User activating Cron starting...")
+	logger.Info("User activating Cron starting...")
 
 	//// Test: run every minute at second 0
 	//_, err = c.AddFunc("0 * * * * *", func() {

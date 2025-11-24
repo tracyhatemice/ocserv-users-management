@@ -2,7 +2,9 @@ package state
 
 import (
 	"fmt"
+	"github.com/mmtaee/ocserv-users-management/common/pkg/logger"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -22,11 +24,30 @@ func NewCronState() *CronState {
 }
 
 func ensureStateFile() error {
-	if _, err := os.Stat(stateFile); os.IsNotExist(err) {
-		// Create file with default values
-		defaultContent := "daily_last_run=0\nmonthly_last_run=0\n"
-		return os.WriteFile(stateFile, []byte(defaultContent), 0644)
+	absPath, err := filepath.Abs(stateFile)
+	if err != nil {
+		logger.Error("Failed to get absolute path for state file %s: %v", stateFile, err)
+	} else {
+		logger.Info("Start finding state file in path %s", absPath)
 	}
+
+	// Ensure directory exists
+	dir := filepath.Dir(absPath)
+	if err = os.MkdirAll(dir, 0755); err != nil {
+		logger.Error("Failed to create state directory %s: %v", dir, err)
+		return err
+	}
+
+	// Create the file if it does not exist
+	if _, err = os.Stat(absPath); os.IsNotExist(err) {
+		defaultContent := "daily_last_run=0\nmonthly_last_run=0\n"
+		if err = os.WriteFile(absPath, []byte(defaultContent), 0644); err != nil {
+			logger.Error("Failed to write state file %s: %v", absPath, err)
+			return err
+		}
+		logger.Info("Created new state file at %s", absPath)
+	}
+
 	return nil
 }
 
@@ -38,6 +59,7 @@ func LoadStateOrDefault() *CronState {
 		fmt.Println("Failed to create state file:", err)
 		return &CronState{}
 	}
+	logger.Info("Loading cron jobs state file")
 
 	data, err := os.ReadFile(stateFile)
 	if err != nil {
@@ -49,14 +71,17 @@ func LoadStateOrDefault() *CronState {
 	lines := strings.Split(string(data), "\n")
 
 	parse := func(s string) time.Time {
+		defaultTime := time.Now().UTC().AddDate(0, -2, 0).Truncate(24 * time.Hour)
 		if s == "0" || s == "" {
-			return time.Time{}
+			// Fallback: 2 days ago for daily, 2 months ago for monthly
+			return defaultTime
 		}
 		t, err := time.Parse("2006-01-02", s)
 		if err != nil {
+			logger.Error("Failed to parse date: %v", err)
 			return time.Time{}
 		}
-		return t
+		return t.UTC()
 	}
 
 	for _, l := range lines {
@@ -67,7 +92,6 @@ func LoadStateOrDefault() *CronState {
 			state.MonthlyLastRun = parse(strings.TrimPrefix(l, "monthly_last_run="))
 		}
 	}
-
 	return state
 }
 
