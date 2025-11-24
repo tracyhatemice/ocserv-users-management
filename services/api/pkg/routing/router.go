@@ -39,11 +39,20 @@ var (
 func Serve(cfg *config.Config) {
 	server := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
+	logger.Info("Starting server at " + server)
+
 	e = echo.New()
 
+	e.Logger = NewLoggerWrapper(logger.GetLogger())
+
 	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(middlewares.RequestLoggerMiddleware())
+	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
+			logger.Error("panic recovered: %v\n%s", err, stack)
+			return nil
+		},
+	}))
 	e.Use(middlewares.TimeoutMiddleware(10 * time.Second))
 
 	if cfg.Debug {
@@ -69,6 +78,7 @@ func Serve(cfg *config.Config) {
 	} else {
 		e.Logger.SetLevel(LabstackLog.WARN)
 		e.HideBanner = true
+		e.HidePort = true
 	}
 
 	e.GET("/health", func(c echo.Context) error {
