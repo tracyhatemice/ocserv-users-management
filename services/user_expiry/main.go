@@ -5,16 +5,14 @@ import (
 	"flag"
 	"github.com/mmtaee/ocserv-users-management/common/pkg/config"
 	"github.com/mmtaee/ocserv-users-management/common/pkg/database"
+	"github.com/mmtaee/ocserv-users-management/common/pkg/logger"
 	"github.com/mmtaee/ocserv-users-management/user_expiry/internal/service"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-var (
-	debug bool
-)
+var debug bool
 
 func main() {
 	flag.BoolVar(&debug, "d", false, "debug mode")
@@ -22,12 +20,16 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
+	logger.Init(ctx, 100)
+
 	config.Init(debug, "", 8888)
 	database.Connect()
 
 	cronService := service.NewCornService()
 
+	logger.Info("Start checking missing cron jobs")
 	cronService.MissedCron()
+	logger.Info("Checking missing cron jobs completed")
 
 	go func() {
 		cronService.UserExpiryCron(ctx)
@@ -37,7 +39,8 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	sig := <-sigChan
-	log.Printf("\nReceived signal: %s\n", sig)
+	logger.Warn("Received signal: %s ", sig)
 	cancel()
 
+	logger.Info("User expiry service shutting down completed")
 }

@@ -171,7 +171,7 @@ sudo systemctl daemon-reload
 
 for service in "${!SERVICES[@]}"; do
   sudo systemctl stop "$service"
-  sudo systemctl enable --now "$service"
+  sudo systemctl enable "$service"
   sudo systemctl restart "$service"
   ok "Started $service service"
 done

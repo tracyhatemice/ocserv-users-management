@@ -10,11 +10,11 @@ import (
 	"github.com/mmtaee/ocserv-users-management/api/internal/providers/routing"
 	"github.com/mmtaee/ocserv-users-management/api/pkg/routing/middlewares"
 	"github.com/mmtaee/ocserv-users-management/common/pkg/config"
+	"github.com/mmtaee/ocserv-users-management/common/pkg/logger"
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/tablewriter/renderer"
 	"github.com/olekukonko/tablewriter/tw"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	"log"
 	"net/http"
 	"os"
 	"slices"
@@ -41,9 +41,16 @@ func Serve(cfg *config.Config) {
 
 	e = echo.New()
 
+	e.Logger = NewLoggerWrapper(logger.GetLogger())
+
 	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(middlewares.RequestLoggerMiddleware())
+	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
+			logger.Error("panic recovered: %v\n%s", err, stack)
+			return nil
+		},
+	}))
 	e.Use(middlewares.TimeoutMiddleware(10 * time.Second))
 
 	if cfg.Debug {
@@ -67,8 +74,9 @@ func Serve(cfg *config.Config) {
 		e.Logger.SetLevel(LabstackLog.DEBUG)
 		verboseLog(server)
 	} else {
-		e.Logger.SetLevel(LabstackLog.WARN)
+		e.Logger.SetLevel(LabstackLog.INFO)
 		e.HideBanner = true
+		e.HidePort = true
 	}
 
 	e.GET("/health", func(c echo.Context) error {
@@ -90,9 +98,11 @@ func Serve(cfg *config.Config) {
 		},
 	}))
 
-	if err := e.Start(server); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	err := e.Start(server)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		e.Logger.Fatal("shutting down the server", err)
 	}
+	logger.Info("Starting server at " + server)
 }
 
 func Shutdown(ctx context.Context) {
@@ -102,7 +112,7 @@ func Shutdown(ctx context.Context) {
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
-	log.Println("server shutdown complete")
+	logger.Info("server shutdown complete")
 }
 
 func verboseLog(service string) {

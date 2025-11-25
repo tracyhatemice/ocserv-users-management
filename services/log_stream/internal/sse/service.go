@@ -2,7 +2,7 @@ package sse
 
 import (
 	"fmt"
-	"log"
+	"github.com/mmtaee/ocserv-users-management/common/pkg/logger"
 	"net/http"
 	"sync"
 	"time"
@@ -23,7 +23,7 @@ func (s *Server) AddClient(client chan string, ip string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.clients[client] = ip
-	log.Printf("Client %v (%s) connected", client, ip)
+	logger.Info("Added new client %v with ip %s", client, ip)
 }
 
 // RemoveClient removes a client connection
@@ -31,7 +31,7 @@ func (s *Server) RemoveClient(client chan string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if ip, ok := s.clients[client]; ok {
-		log.Printf("Client %v (%s) disconnected", client, ip)
+		logger.Info("Client %v with ip %s disconnected", client, ip)
 		delete(s.clients, client)
 		close(client)
 	}
@@ -45,7 +45,7 @@ func (s *Server) StartBroadcast(broadcaster <-chan string) {
 				select {
 				case ch <- msg:
 				default:
-					log.Println("Dropped message for client", s.clients[ch])
+					logger.Error("Broadcast channel full, Dropped message for client %s", s.clients[ch])
 					continue
 				}
 			}
@@ -56,7 +56,10 @@ func (s *Server) StartBroadcast(broadcaster <-chan string) {
 
 func (s *Server) SSEHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		clientAddr := r.RemoteAddr
+
 		if len(s.clients) > 3 {
+			logger.Warn("Too many clients connected: %s", clientAddr)
 			http.Error(w, "Too many clients connected", http.StatusTooManyRequests)
 			return
 		}
@@ -76,22 +79,30 @@ func (s *Server) SSEHandler() http.HandlerFunc {
 
 		clientChan := make(chan string, 10)
 		s.AddClient(clientChan, r.RemoteAddr)
+		logger.Info("Client connected: %s", clientAddr)
+
+		defer func() {
+			s.RemoveClient(clientChan)
+			logger.Info("Client disconnected: %s", clientAddr)
+		}()
 
 		for {
 			select {
 			case <-r.Context().Done():
-				s.RemoveClient(clientChan)
 				return
 			case message := <-clientChan:
 				if message == "" {
 					return
 				}
+
 				_, err := fmt.Fprintf(w, "data: %s\n\n", message)
 				if err != nil {
-					log.Println("Error writing to client:", err)
+					logger.Error("Error writing to client %s", s.clients[clientChan])
 					return
 				}
+
 				flusher.Flush()
+
 				time.Sleep(500 * time.Millisecond)
 			}
 		}
