@@ -155,7 +155,7 @@ onMounted(() => {
                                             </v-col>
                                         </v-row>
                                     </td>
-                                    <td>{{ item.groups || 'defaults' }}</td>
+                                    <td>{{ item.group }}</td>
                                 </tr>
                             </tbody>
                         </v-table>
