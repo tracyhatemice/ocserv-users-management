@@ -52,7 +52,7 @@ type OcservUserRepositoryInterface interface {
 	TotalBandwidth(ctx context.Context) (TotalBandwidths, error)
 	TotalBandwidthDateRange(ctx context.Context, dateStart, dateEnd *time.Time) (TotalBandwidths, error)
 	TotalBandwidthUserDateRange(ctx context.Context, id string, dateStart, dateEnd *time.Time) (TotalBandwidths, error)
-	Ocpasswd(ctx context.Context) (*[]user.Ocpasswd, error)
+	Ocpasswd(ctx context.Context, pagination *request.Pagination) (*[]user.Ocpasswd, int, error)
 	OcpasswdSyncToDB(ctx context.Context, users []models.OcservUser) ([]models.OcservUser, error)
 }
 
@@ -465,8 +465,38 @@ func (o *OcservUserRepository) TotalBandwidthUserDateRange(ctx context.Context, 
 	return total, nil
 }
 
-func (o *OcservUserRepository) Ocpasswd(ctx context.Context) (*[]user.Ocpasswd, error) {
-	return o.commonOcservUserRepo.Ocpasswd(ctx)
+func (o *OcservUserRepository) Ocpasswd(ctx context.Context, pagination *request.Pagination) (*[]user.Ocpasswd, int, error) {
+	users, total, err := o.commonOcservUserRepo.Ocpasswd(ctx, pagination.Page, pagination.PageSize)
+	if err != nil || total == 0 {
+		return nil, 0, err
+	}
+	usernames := make([]string, len(*users))
+	for i, u := range *users {
+		usernames[i] = u.Username
+	}
+	var existing []string
+	if err = o.db.WithContext(ctx).
+		Model(&models.OcservUser{}).
+		Where("username IN ?", usernames).
+		Pluck("username", &existing).Error; err != nil {
+		return nil, 0, err
+	}
+
+	existingSet := make(map[string]struct{}, len(existing))
+	for _, u := range existing {
+		existingSet[u] = struct{}{}
+	}
+	newUsers := make([]user.Ocpasswd, 0, len(*users))
+	for _, u := range *users {
+		if _, exists := existingSet[u.Username]; !exists {
+			newUsers = append(newUsers, user.Ocpasswd{
+				Username: u.Username,
+				Groups:   u.Groups,
+			})
+		}
+	}
+
+	return &newUsers, total, nil
 }
 
 func (o *OcservUserRepository) OcpasswdSyncToDB(ctx context.Context, users []models.OcservUser) ([]models.OcservUser, error) {

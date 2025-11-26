@@ -753,6 +753,37 @@ const docTemplate = `{
                 "summary": "Ocserv Users from ocpasswd file",
                 "parameters": [
                     {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Page number, starting from 1",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Field to order by",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "ASC",
+                            "DESC"
+                        ],
+                        "type": "string",
+                        "description": "Sort order, either ASC or DESC",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "Bearer TOKEN",
                         "name": "Authorization",
@@ -764,7 +795,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.Ocpasswd"
+                            "$ref": "#/definitions/ocserv_user.OcservUsersSyncResponse"
                         }
                     },
                     "400": {
@@ -792,7 +823,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Ocserv(Ocpasswd Sync)"
+                    "Ocserv(Ocpasswd)"
                 ],
                 "summary": "Ocserv Users from ocpasswd file to db",
                 "parameters": [
@@ -2776,6 +2807,23 @@ const docTemplate = `{
                 }
             }
         },
+        "ocserv_user.OcservUsersSyncResponse": {
+            "type": "object",
+            "required": [
+                "meta"
+            ],
+            "properties": {
+                "meta": {
+                    "$ref": "#/definitions/request.Meta"
+                },
+                "result": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.Ocpasswd"
+                    }
+                }
+            }
+        },
         "ocserv_user.StatisticsResponse": {
             "type": "object",
             "required": [
@@ -3129,9 +3177,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "raw_line": {
-                    "type": "string"
                 },
                 "username": {
                     "type": "string"

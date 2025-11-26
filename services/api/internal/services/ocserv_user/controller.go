@@ -141,10 +141,7 @@ func (ctl *Controller) CreateOcservUser(c echo.Context) error {
 
 	expireAt, err := time.Parse("2006-01-02", data.ExpireAt)
 	if err != nil {
-		expireAt, _ = time.Parse(
-			"2006-01-02",
-			time.Now().AddDate(0, 0, 30).Format("2006-01-02"),
-		)
+		expireAt, _ = time.Parse("2006-01-02", time.Now().AddDate(0, 0, 30).Format("2006-01-02"))
 	}
 
 	if data.TrafficType == models.Free {
@@ -523,24 +520,38 @@ func (ctl *Controller) TotalBandwidth(c echo.Context) error {
 // @Tags         Ocserv(Ocpasswd)
 // @Accept       json
 // @Produce      json
+// @Param 		 page query int false "Page number, starting from 1" minimum(1)
+// @Param 		 size query int false "Number of items per page" minimum(1) maximum(100) name(size)
+// @Param 		 order query string false "Field to order by"
+// @Param 		 sort query string false "Sort order, either ASC or DESC" Enums(ASC, DESC)
 // @Param        Authorization header string true "Bearer TOKEN"
 // @Failure      400 {object} request.ErrorResponse
 // @Failure      401 {object} middlewares.Unauthorized
-// @Success      200 {object} user.Ocpasswd
+// @Success      200 {object} OcservUsersSyncResponse
 // @Router       /ocserv/users/ocpasswd [get]
 func (ctl *Controller) OcpasswdUsers(c echo.Context) error {
-	users, err := ctl.ocservUserRepo.Ocpasswd(c.Request().Context())
+	pagination := ctl.request.Pagination(c)
+
+	users, total, err := ctl.ocservUserRepo.Ocpasswd(c.Request().Context(), pagination)
 	if err != nil {
 		return ctl.request.BadRequest(c, err)
 	}
-	return c.JSON(http.StatusOK, users)
+
+	return c.JSON(http.StatusOK, OcservUsersSyncResponse{
+		Meta: request.Meta{
+			Page:         pagination.Page,
+			TotalRecords: int64(total),
+			PageSize:     pagination.PageSize,
+		},
+		Result: users,
+	})
 }
 
 // SyncToDB      Ocserv Users from ocpasswd file to db
 //
 // @Summary      Ocserv Users from ocpasswd file to db
 // @Description  Ocserv Users from ocpasswd file to db
-// @Tags         Ocserv(Ocpasswd Sync)
+// @Tags         Ocserv(Ocpasswd)
 // @Accept       json
 // @Produce      json
 // @Param        Authorization header string true "Bearer TOKEN"

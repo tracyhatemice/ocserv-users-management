@@ -615,6 +615,17 @@ definitions:
     required:
     - meta
     type: object
+  ocserv_user.OcservUsersSyncResponse:
+    properties:
+      meta:
+        $ref: '#/definitions/request.Meta'
+      result:
+        items:
+          $ref: '#/definitions/user.Ocpasswd'
+        type: array
+    required:
+    - meta
+    type: object
   ocserv_user.StatisticsResponse:
     properties:
       statistics:
@@ -861,8 +872,6 @@ definitions:
         items:
           type: string
         type: array
-      raw_line:
-        type: string
       username:
         type: string
     type: object
@@ -1603,6 +1612,28 @@ paths:
       - application/json
       description: Ocserv Users from ocpasswd file
       parameters:
+      - description: Page number, starting from 1
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: Number of items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: size
+        type: integer
+      - description: Field to order by
+        in: query
+        name: order
+        type: string
+      - description: Sort order, either ASC or DESC
+        enum:
+        - ASC
+        - DESC
+        in: query
+        name: sort
+        type: string
       - description: Bearer TOKEN
         in: header
         name: Authorization
@@ -1614,7 +1645,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.Ocpasswd'
+            $ref: '#/definitions/ocserv_user.OcservUsersSyncResponse'
         "400":
           description: Bad Request
           schema:
@@ -1662,7 +1693,7 @@ paths:
             $ref: '#/definitions/middlewares.Unauthorized'
       summary: Ocserv Users from ocpasswd file to db
       tags:
-      - Ocserv(Ocpasswd Sync)
+      - Ocserv(Ocpasswd)
   /ocserv/users/statistics:
     get:
       consumes:

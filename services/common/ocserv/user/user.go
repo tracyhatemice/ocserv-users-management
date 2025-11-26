@@ -17,7 +17,6 @@ type OcservUser struct{}
 type Ocpasswd struct {
 	Username string   `json:"username"`
 	Groups   []string `json:"groups"`
-	RawLine  string   `json:"raw_line"`
 }
 
 type OcservUserInterface interface {
@@ -27,7 +26,7 @@ type OcservUserInterface interface {
 	Delete(username string) (string, error)
 	CreateConfig(username string, config *models.OcservUserConfig) error
 	DeleteConfig(username string) error
-	Ocpasswd(ctx context.Context) (*[]OcpasswdSync, error)
+	Ocpasswd(ctx context.Context, page int, PageSize int) (*[]Ocpasswd, int, error)
 }
 
 func NewOcservUser() *OcservUser {
@@ -142,25 +141,37 @@ func (u *OcservUser) DeleteConfig(username string) error {
 // raw line from the file for debugging or additional processing.
 //
 // If the ocpasswd file cannot be opened or read, an error is returned.
-func (u *OcservUser) Ocpasswd(ctx context.Context) (*[]Ocpasswd, error) {
+func (u *OcservUser) Ocpasswd(ctx context.Context, page, pageSize int) (*[]Ocpasswd, int, error) {
 	f, err := os.Open(utils.OcpasswdPath)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer f.Close()
 
+	const maxCapacity = 4 * 1024 * 1024 // 4 MB
 	scanner := bufio.NewScanner(f)
+	buf := make([]byte, maxCapacity)
+	scanner.Buffer(buf, maxCapacity)
+
 	var users []Ocpasswd
+	lineIndex := 0
+	start := (page - 1) * pageSize
+	end := start + pageSize
 
 	for scanner.Scan() {
 		if err = ctx.Err(); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		line := strings.TrimSpace(scanner.Text())
 
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
+		}
+
+		if lineIndex < start {
+			lineIndex++
+			continue // Skip until we reach the start index
 		}
 
 		parts := strings.Split(line, ":")
@@ -186,13 +197,22 @@ func (u *OcservUser) Ocpasswd(ctx context.Context) (*[]Ocpasswd, error) {
 		users = append(users, Ocpasswd{
 			Username: username,
 			Groups:   groups,
-			RawLine:  line,
 		})
+
+		lineIndex++
+		if lineIndex >= end {
+			break // reached the end of this page
+		}
 	}
 
 	if err = scanner.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &users, nil
+	total, err := OcpasswdTotalLines(utils.OcpasswdPath)
+	if err != nil {
+		total = 0
+	}
+
+	return &users, total, nil
 }

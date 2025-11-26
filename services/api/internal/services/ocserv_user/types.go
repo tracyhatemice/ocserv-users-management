@@ -56,3 +56,8 @@ type SyncOcpasswdRequest struct {
 	Description *string                  `json:"description" validate:"omitempty,max=1024" example:"User for testing VPN access"`
 	Config      *models.OcservUserConfig `json:"config" validate:"omitempty"`
 }
+
+type OcservUsersSyncResponse struct {
+	Meta   request.Meta     `json:"meta" validate:"required"`
+	Result *[]user.Ocpasswd `json:"result" validate:"omitempty"`
+}
