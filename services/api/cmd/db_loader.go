@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	apiModels "github.com/mmtaee/ocserv-dashboard/api/internal/models"
+	"github.com/mmtaee/ocserv-dashboard/api/pkg/routing"
 	"github.com/mmtaee/ocserv-dashboard/common/models"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/config"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/database"
@@ -10,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 	"reflect"
+	"time"
 )
 
 var dbLoaderCmd = &cobra.Command{
@@ -25,13 +28,23 @@ func init() {
 }
 
 func loader() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	logger.Init(ctx, 100)
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("panic recovered: %v", r)
+		}
+	}()
+
 	config.Init(false, "", 0)
 
 	database.ConnectPostgres()
 	defer database.ClosePostgres()
 	pgDB := database.GetPostgres()
 
-	database.ConnectSQLite(true)
+	database.ConnectSQLite(false)
 	defer database.CloseSQLite()
 	sqliteDB := database.GetSQLite()
 
@@ -58,6 +71,7 @@ func loader() {
 			logger.Fatal("error migrating: %v", err)
 		}
 
+		logger.Info("Database AutoMigrate SQlite to PostgreSQL completed")
 		// 2. Copy data
 		if err := migrateTable(sqliteDB, pgDB, model); err != nil {
 			logger.Fatal("error migrating: %v", err)
@@ -71,6 +85,9 @@ func loader() {
 		logger.Info("Migration for table (%s) complete", tableName)
 	}
 
+	routing.Shutdown(ctx)
+	database.Close()
+	database.CloseSQLite()
 }
 
 func migrateTable(sqliteDB, pgDB *gorm.DB, model interface{}) error {
