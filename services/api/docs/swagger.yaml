@@ -996,6 +996,29 @@ definitions:
     required:
     - meta
     type: object
+  systemd.OcservSystemdStatus:
+    properties:
+      active_state:
+        type: string
+      cpu_usage_nsec:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      main_pid:
+        type: integer
+      memory:
+        type: integer
+      start_time:
+        type: string
+      sub_state:
+        type: string
+      tasks:
+        type: integer
+      unit_file_state:
+        type: string
+    type: object
   user.Ocpasswd:
     properties:
       group:
@@ -2748,4 +2771,37 @@ paths:
       summary: Get User Profile
       tags:
       - System(Users)
+  /systemd/status:
+    get:
+      consumes:
+      - application/json
+      description: Ocserv systemctl status
+      parameters:
+      - description: Bearer TOKEN
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/systemd.OcservSystemdStatus'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/request.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middlewares.Unauthorized'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/middlewares.TooManyRequests'
+      summary: Ocserv systemctl status
+      tags:
+      - Systemd
 swagger: "2.0"

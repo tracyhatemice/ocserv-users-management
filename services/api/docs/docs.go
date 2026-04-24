@@ -2614,6 +2614,56 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/systemd/status": {
+            "get": {
+                "description": "Ocserv systemctl status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Systemd"
+                ],
+                "summary": "Ocserv systemctl status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer TOKEN",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/systemd.OcservSystemdStatus"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Unauthorized"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.TooManyRequests"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -4009,6 +4059,41 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.User"
                     }
+                }
+            }
+        },
+        "systemd.OcservSystemdStatus": {
+            "type": "object",
+            "properties": {
+                "active_state": {
+                    "type": "string"
+                },
+                "cpu_usage_nsec": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "main_pid": {
+                    "type": "integer"
+                },
+                "memory": {
+                    "type": "integer"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "sub_state": {
+                    "type": "string"
+                },
+                "tasks": {
+                    "type": "integer"
+                },
+                "unit_file_state": {
+                    "type": "string"
                 }
             }
         },
