@@ -26,7 +26,7 @@
 # ==============================================================
 
 # ==========================================
-# Load shared logging helpers (print_message)
+# Load shared logging helpers
 # ==========================================
 source ./scripts/lib.sh
 

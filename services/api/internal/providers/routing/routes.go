@@ -8,6 +8,7 @@ import (
 	occtlRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/occtl"
 	ocservGroupRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/ocserv_group"
 	ocservUserRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/ocserv_user"
+	reportRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/report"
 	systemRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/system"
 )
 
@@ -25,4 +26,7 @@ func Register(e *echo.Echo) {
 
 	// customers
 	customerRoutes.Routes(group)
+
+	// reports
+	reportRoutes.Routes(group)
 }

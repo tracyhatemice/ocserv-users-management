@@ -14,6 +14,7 @@ type Controller struct {
 	request        request.CustomRequestInterface
 	occtlRepo      repository.OcctlRepositoryInterface
 	ocservUserRepo repository.OcservUserRepositoryInterface
+	reportRepo     repository.ReportRepositoryInterface
 }
 
 func New() *Controller {
@@ -21,6 +22,7 @@ func New() *Controller {
 		request:        request.NewCustomRequest(),
 		occtlRepo:      repository.NewOcctlRepository(),
 		ocservUserRepo: repository.NewtOcservUserRepository(),
+		reportRepo:     repository.NewtReportRepository(),
 	}
 }
 
@@ -67,7 +69,7 @@ func (ctl *Controller) Home(c echo.Context) error {
 
 	go func() {
 		defer wg.Done()
-		data, err := ctl.ocservUserRepo.TenDaysStats(ctx)
+		data, err := ctl.reportRepo.TenDaysStats(ctx)
 		if err != nil {
 			errs <- err
 			return
@@ -97,7 +99,7 @@ func (ctl *Controller) Home(c echo.Context) error {
 
 	go func() {
 		defer wg.Done()
-		users, err := ctl.ocservUserRepo.TotalUsers(ctx)
+		users, err := ctl.reportRepo.TotalUsers(ctx)
 		if err != nil {
 			errs <- err
 			return
@@ -107,7 +109,7 @@ func (ctl *Controller) Home(c echo.Context) error {
 
 	go func() {
 		defer wg.Done()
-		topUser, err := ctl.ocservUserRepo.TopBandwidthUser(ctx)
+		topUser, err := ctl.reportRepo.TopBandwidthUser(ctx)
 		if err != nil {
 			errs <- err
 			return
@@ -117,7 +119,7 @@ func (ctl *Controller) Home(c echo.Context) error {
 
 	go func() {
 		defer wg.Done()
-		bandwidth, err := ctl.ocservUserRepo.TotalBandwidth(ctx)
+		bandwidth, err := ctl.reportRepo.TotalBandwidth(ctx)
 		if err != nil {
 			errs <- err
 			return

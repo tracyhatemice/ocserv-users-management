@@ -1,8 +1,27 @@
-networks:
-  shared-app:
-
-
 services:
+  postgres:
+    image: postgres:17
+    container_name: ocserv-postgres
+    restart: always
+#    environment: # not needed, read from .env file
+#      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+#      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    volumes:
+      - /opt/ocserv_dashboard/docker_volumes/pg_db:/var/lib/postgresql/data
+    networks:
+      - shared-app
+    env_file:
+      - ./.env
+    ports:
+      - "127.0.0.1:5435:5432" # develop expose port
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   ocserv:
     build:
       context: .
@@ -19,13 +38,16 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     volumes:
+      - /opt/ocserv_dashboard/docker_volumes/db:/usr/local/bin/db  # deprecated (sqlite)
       - /opt/ocserv_dashboard/docker_volumes/ocserv:/etc/ocserv
-      - /opt/ocserv_dashboard/docker_volumes/db:/usr/local/bin/db
     ports:
       - ${OCSERV_PORT:-443}:443/tcp
       - ${OCSERV_PORT:-443}:443/udp
     networks:
       - shared-app
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
@@ -41,7 +63,6 @@ services:
       dockerfile: Dockerfile-Stream-Log
     container_name: log_stream
     volumes:
-      - /opt/ocserv_dashboard/docker_volumes/db:/app/db
       - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - ./.env
@@ -49,6 +70,8 @@ services:
       - shared-app
     depends_on:
       ocserv:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     restart: unless-stopped
 
@@ -59,14 +82,15 @@ services:
       dockerfile: Dockerfile-User-Expiry
     container_name: user_expiry
     volumes:
-      - /opt/ocserv_dashboard/docker_volumes/db:/app/db
-      - /opt/ocserv_dashboard/docker_volumes/cron_journal:/app/cron_journal
+      - /opt/ocserv_dashboard/docker_volumes/cron_journal:/app/cron_journal # journal of user expiry .txt file
     env_file:
       - ./.env
     networks:
       - shared-app
     depends_on:
       ocserv:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     restart: unless-stopped
 
@@ -92,3 +116,5 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+networks:
+  shared-app:

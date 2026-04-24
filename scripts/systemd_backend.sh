@@ -15,21 +15,23 @@
 #
 # Requirements:
 #   - lib.sh must exist and define:
-#       print_message(), log(), ok(), warn(), die()
+#       log(), ok(), warn(), die()
 #
 # Exit behavior:
 #   Script exits immediately on error (set -e)
 #   Any error prints the failing line number
 # ===============================
 
-# Load logging + helper utilities
+# ==============================================================
+# Load shared logging utilities
+# (print_message, log, ok, warn, die are defined in lib.sh)
+# ==============================================================
 source ./scripts/lib.sh
-
-log "Starting Backend Deployment..."
 
 # -----------------------
 # Deployment directories
 # -----------------------
+log "Starting Backend Deployment..."
 BIN_DIR="/opt/ocserv_dashboard"
 sudo mkdir -p "$BIN_DIR"
 log "Using deployment directory: $BIN_DIR"
@@ -100,6 +102,27 @@ if [[ -f ".env" ]]; then
 else
   warn ".env file not found, skipping environment copy"
 fi
+
+# -----------------------
+# Check to load old SQlite DB to PostgreSQL
+# -----------------------
+#DB_DIR="/usr/local/bin/db"
+#DB_FILE="${DB_DIR}/ocserv.db"
+#
+#if [ -f "$DB_FILE" ]; then
+#    if "${BIN_DIR}"/api db-loader; then
+#        mv "${DB_FILE}" \
+#           "${DB_DIR}/loaded_to_postgres_ocserv.db"
+#    else
+#        exit 128
+#    fi
+#fi
+
+# -----------------------
+# Database Migration
+# -----------------------
+"${BIN_DIR}"/api migrate || exit
+
 
 # -----------------------
 # Create systemd units

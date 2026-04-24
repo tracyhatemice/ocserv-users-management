@@ -18,14 +18,14 @@ function triggerFileSelect() {
     fileInput.value?.click();
 }
 
-const detectRestoreType= (file: File): 'users' | 'groups' => {
+const detectRestoreType = (file: File): 'users' | 'groups' => {
     const name = file.name.toLowerCase();
 
     if (/users/.test(name)) return 'users';
     if (/groups/.test(name)) return 'groups';
 
     return restoreType.value;
-}
+};
 
 function onFileSelected(event: Event) {
     const target = event.target as HTMLInputElement;

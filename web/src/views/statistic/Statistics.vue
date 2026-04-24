@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type ModelsDailyTraffic, OcservStatisticsApi } from '@/api';
+import { type ModelsDailyTraffic, ReportApi } from '@/api';
 import { getAuthorization } from '@/utils/request';
 import { ref } from 'vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
@@ -21,8 +21,8 @@ const initData = {
 };
 
 const search = (dateStart: string, dateEnd: string) => {
-    const api = new OcservStatisticsApi();
-    api.ocservUsersStatisticsGet({
+    const api = new ReportApi();
+    api.reportsStatisticsGet({
         ...getAuthorization(),
         dateStart,
         dateEnd

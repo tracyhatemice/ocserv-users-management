@@ -23,7 +23,7 @@ type UserToken struct {
 	ID        uint      `json:"-" gorm:"primaryKey;autoIncrement"`
 	UserID    uint      `json:"-" gorm:"index"`
 	UID       string    `json:"uid" gorm:"type:varchar(26);not null;uniqueIndex"`
-	Token     string    `json:"token" gorm:"type:varchar(128)"`
+	Token     string    `json:"token" gorm:"type:text"`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	ExpireAt  time.Time `json:"expire_at"`
 	User      User      `json:"user"`

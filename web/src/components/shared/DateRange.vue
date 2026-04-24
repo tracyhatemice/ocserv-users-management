@@ -16,6 +16,14 @@ const props = defineProps({
     initDate: {
         type: Object as () => InitDate,
         required: false
+    },
+    disableMore30Days: {
+        type: Boolean,
+        default: true
+    },
+    preHook: {
+        type: Boolean,
+        default: true
     }
 });
 
@@ -39,7 +47,7 @@ const searchDisable = computed(() => {
     // if only end is filled → valid
     if (!dateStart.value && dateEnd.value) return false;
 
-    if (dateStart.value && dateEnd.value) {
+    if (dateStart.value && dateEnd.value && props.disableMore30Days) {
         const start = new Date(dateStart.value);
         const end = new Date(dateEnd.value);
 
@@ -68,7 +76,9 @@ watch(
         if (val?.dateEnd) {
             dateEnd.value = val.dateEnd;
         }
-        search();
+        if (props.preHook) {
+            search();
+        }
     },
     { immediate: true, deep: true }
 );

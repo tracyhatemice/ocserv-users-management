@@ -32,6 +32,7 @@ OC_NET="${OC_NET:-172.16.24.0/24}"             # VPN IPv4 subnet
 OCSERV_DNS="${OCSERV_DNS:-1.1.1.1}"           # DNS pushed to clients
 ETH="${ETH:-}"                                 # External interface (auto-detect if empty)
 
+
 # ==========================================
 # Function: auto_detect_interface
 # Description:
@@ -52,9 +53,9 @@ auto_detect_interface
 # ==============================================================
 log "Installing Ocserv..."
 
-sudo chmod +x scripts/ocserv_setup.sh
+sudo chmod +x scripts/systemd_ocserv_setup.sh
 
-if sudo scripts/ocserv_setup.sh; then
+if sudo scripts/systemd_ocserv_setup.sh; then
     log "ocserv installed successfully from source."
 else
     sudo apt install -y ocserv
@@ -202,13 +203,13 @@ printf 'banner = "%s"\n' "$OCSERV_BANNER" | sudo tee -a "$OCSERV_CONF" > /dev/nu
 }
 
 if [[ ! -f "$OCSERV_CONF" ]]; then
-    print_message info "📄 ocserv.conf not found, creating new systemd config"
+    info "📄 ocserv.conf not found, creating new systemd config"
     write_ocserv_conf_systemd
 elif ! head -n 5 "$OCSERV_CONF" | grep -q "$MANAGED_HEADER"; then
-    print_message warning "⚠️ ocserv.conf not managed by dashboard, overwriting"
+    warn "⚠️ ocserv.conf not managed by dashboard, overwriting"
     write_ocserv_conf_systemd
 else
-    print_message success "✅ ocserv.conf already managed (systemd mode)"
+    ok "✅ ocserv.conf already managed (systemd mode)"
 fi
 
 sudo mkdir -p /etc/ocserv/defaults /etc/ocserv/groups /etc/ocserv/users
@@ -218,10 +219,10 @@ GROUP_CONF="/etc/ocserv/defaults/group.conf"
 sudo mkdir -p "$(dirname "$GROUP_CONF")"
 
 if [[ ! -f "$GROUP_CONF" ]]; then
-    print_message info "📄 Creating default group configuration"
+    info "📄 Creating default group configuration"
     sudo touch "${GROUP_CONF}"
 else
-    print_message success "✅ Default group configuration already exists"
+    ok "✅ Default group configuration already exists"
 fi
 
 # ==============================================================

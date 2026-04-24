@@ -98,9 +98,19 @@ func (c *OcservGroupConfig) Value() (driver.Value, error) {
 }
 
 func (c *OcservGroupConfig) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return fmt.Errorf("failed to convert value to []byte")
+	if value == nil {
+		return nil
 	}
-	return json.Unmarshal(bytes, c)
+
+	switch v := value.(type) {
+
+	case []byte:
+		return json.Unmarshal(v, c)
+
+	case string:
+		return json.Unmarshal([]byte(v), c)
+
+	default:
+		return fmt.Errorf("unsupported type for OcservUserConfig: %T", value)
+	}
 }

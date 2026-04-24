@@ -1,27 +1,32 @@
 package bootstrap
 
 import (
-	"github.com/mmtaee/ocserv-dashboard/api/internal/models"
-	commonModels "github.com/mmtaee/ocserv-dashboard/common/models"
+	"github.com/go-gormigrate/gormigrate/v2"
+	"github.com/mmtaee/ocserv-dashboard/api/internal/migrations"
+	"github.com/mmtaee/ocserv-dashboard/common/pkg/config"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/database"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/logger"
 )
 
-var tables = []interface{}{
-	&models.System{},
-	&models.User{},
-	&models.UserToken{},
-	&commonModels.OcservGroup{},
-	&commonModels.OcservUser{},
-	&commonModels.OcservUserTrafficStatistics{},
+var Migrations = []*gormigrate.Migration{
+	migrations.Migration001,
+	migrations.Migration002,
 }
 
 func Migrate() {
-	logger.Info("starting migrations...")
-	engine := database.GetConnection()
-	err := engine.AutoMigrate(tables...)
-	if err != nil {
-		logger.Fatal("error in AutoMigrate: %v", err)
+	logger.Info("Starting database migrations...")
+
+	config.Init(false, "", 0)
+
+	database.Connect()
+	defer database.Close()
+
+	db := database.GetConnection()
+
+	m := gormigrate.New(db, gormigrate.DefaultOptions, Migrations)
+	if err := m.Migrate(); err != nil {
+		logger.Fatal("Failed to run migrations: %v", err)
 	}
-	logger.Info("migration complete")
+
+	logger.Info("Database migrations complete")
 }

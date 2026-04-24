@@ -41,10 +41,6 @@ api.interceptors.response.use(
         const loadingStore = useLoadingStore();
         loadingStore.hide();
         const { response } = error;
-        const snackbar = useSnackbarStore();
-        let errorList = response.data.error;
-        const { t } = useI18n();
-
         if (response) {
             if (response.status === 401) {
                 localStorage.removeItem('token');
@@ -52,14 +48,10 @@ api.interceptors.response.use(
             }
             if (response.status === 400) {
                 if (response.data.hasOwnProperty('error') && response.data['error'] == 'record not found') {
-                    snackbar.show({
-                        id: 1,
-                        message: 'record not found',
-                        color: 'error',
-                        timeout: 4000
-                    });
+                    window.location.href = '/not_found';
                 }
-
+                const snackbar = useSnackbarStore();
+                let errorList = response.data.error;
                 if (Array.isArray(errorList)) {
                     const messages: SnackbarItem[] = errorList.map((message: string, index: number) => ({
                         id: index + 1,
@@ -69,6 +61,7 @@ api.interceptors.response.use(
                     }));
                     snackbar.show(messages);
                 } else {
+                    const { t } = useI18n();
                     snackbar.show({
                         id: 1,
                         message: typeof errorList === 'string' ? errorList : t('UNKNOWN_ERROR'),

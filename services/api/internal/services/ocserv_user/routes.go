@@ -18,11 +18,9 @@ func Routes(e *echo.Group) {
 	g.POST("/:uid/unlock", ctl.UnLockOcservUser)
 	g.POST("/:uid/activate", ctl.ActivateExpiredOcservUsers)
 	g.POST("/:username/disconnect", ctl.DisconnectOcservUser)
-	g.GET("/:uid/statistics", ctl.StatisticsOcservUser)
-	g.GET("/stats", ctl.UserStats)
-	
-	g.GET("/statistics", ctl.Statistics, middlewares.AdminPermission())
-	g.GET("/total-bandwidth", ctl.TotalBandwidth, middlewares.AdminPermission())
+	g.GET("/:uid/session_logs", ctl.OcservUserSessionLogs)
+	g.GET("/:uid/statistics", ctl.OcservUserStatistics)
+
 	g.GET("/ocpasswd", ctl.OcpasswdUsers, middlewares.AdminPermission())
 	g.POST("/ocpasswd/sync", ctl.SyncToDB, middlewares.AdminPermission())
 }

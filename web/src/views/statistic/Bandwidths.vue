@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { numberToFixer } from '@/utils/convertors';
-import { OcservBandwidthApi, type RepositoryTotalBandwidths } from '@/api';
+import { ReportApi, type RepositoryTotalBandwidths } from '@/api';
 import { getAuthorization } from '@/utils/request';
 import { useI18n } from 'vue-i18n';
 import { computed, ref } from 'vue';
@@ -22,8 +22,8 @@ const initData = {
 };
 
 const search = (dateStart: string, dateEnd: string) => {
-    const api = new OcservBandwidthApi();
-    api.ocservUsersTotalBandwidthGet({
+    const api = new ReportApi();
+    api.reportsTotalBandwidthGet({
         ...getAuthorization(),
         dateStart,
         dateEnd

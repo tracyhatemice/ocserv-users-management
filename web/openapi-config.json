@@ -1,6 +1,6 @@
 {
     "generatorName": "typescript-axios",
-    "inputSpec": "http://127.0.0.1:8080/swagger/doc.json",
+    "inputSpec": "http://127.0.0.1:8888/swagger/doc.json",
     "outputDir": "src/api",
     "additionalProperties": {
         "useSingleRequestParameter": true,

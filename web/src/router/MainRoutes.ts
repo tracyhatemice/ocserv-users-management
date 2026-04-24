@@ -62,15 +62,24 @@ const MainRoutes = {
             component: () => import('@/views/ocserv_user/OcservUserUpdate.vue'),
             props: true
         },
-        {
-            name: 'Ocserv User Statistics',
-            path: '/ocserv/management/users/:uid/statistics',
-            component: () => import('@/views/ocserv_user/OcservUserStatistics.vue'),
-            props: (route: RouteLocationNormalized) => ({
-                uid: route.params.uid as string,
-                username: route.query.username as string | undefined
-            })
-        },
+        // {
+        //     name: 'Ocserv User Statistics',
+        //     path: '/ocserv/management/users/:uid/statistics',
+        //     component: () => import('@/views/ocserv_user/OcservUserStatistics.vue'),
+        //     props: (route: RouteLocationNormalized) => ({
+        //         uid: route.params.uid as string,
+        //         username: route.query.username as string | undefined
+        //     })
+        // },
+        // {
+        //     name: 'Ocserv User Session Logs',
+        //     path: '/ocserv/management/users/:uid/session_logs',
+        //     component: () => import('@/views/ocserv_user/OcservUserSessionLogs.vue'),
+        //     props: (route: RouteLocationNormalized) => ({
+        //         uid: route.params.uid as string,
+        //         username: route.query.username as string | undefined
+        //     })
+        // },
         {
             name: 'Ocserv Sync',
             path: '/ocserv/management/ocserv/sync',
@@ -83,9 +92,14 @@ const MainRoutes = {
             component: () => import('@/views/ocserv/Occtl.vue')
         },
         {
-            name: 'Stats',
+            name: 'Statistics',
             path: '/statistics',
-            component: () => import('@/views/statistic/Stats.vue')
+            component: () => import('@/views/statistic/Statistics.vue')
+        },
+        {
+            name: 'Session Logs',
+            path: '/session_logs',
+            component: () => import('@/views/statistic/SessionLogs.vue')
         },
         {
             name: 'Bandwidths',

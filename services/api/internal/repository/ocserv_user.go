@@ -27,12 +27,6 @@ type OcpasswdUser struct {
 	Group    string `json:"group" validate:"required"`
 }
 
-type UserStatsResult struct {
-	Active      int64
-	Deactivated int64
-	Locked      int64
-}
-
 type OcservUserRepository struct {
 	db                    *gorm.DB
 	commonOcservUserRepo  user.OcservUserInterface
@@ -50,16 +44,10 @@ type OcservUserCRUD interface {
 }
 
 type OcservUserStats interface {
-	TenDaysStats(ctx context.Context) ([]models.DailyTraffic, error)
 	UserStatistics(ctx context.Context, uid string, dateStart, dateEnd *time.Time) ([]models.DailyTraffic, error)
-	Statistics(ctx context.Context, dateStart, dateEnd *time.Time) ([]models.DailyTraffic, error)
-	TotalUsers(ctx context.Context) (int64, error)
-	TopBandwidthUser(ctx context.Context) (TopBandwidthUsers, error)
-	TotalBandwidthUser(ctx context.Context, uid string) (TotalBandwidths, error)
-	TotalBandwidth(ctx context.Context) (TotalBandwidths, error)
-	TotalBandwidthDateRange(ctx context.Context, dateStart, dateEnd *time.Time) (TotalBandwidths, error)
-	TotalBandwidthUserDateRange(ctx context.Context, id string, dateStart, dateEnd *time.Time) (TotalBandwidths, error)
-	UsersStat(ctx context.Context) (UserStatsResult, error)
+
+	TotalBandwidthUserDateRange(ctx context.Context, uid string, dateStart, dateEnd *time.Time) (TotalBandwidths, error)
+	UserSessionLogs(ctx context.Context, pagination *request.Pagination, username string, dateStart, dateEnd *time.Time) (*[]models.OcservUserSessionLog, int64, error)
 }
 
 type OcservUserPassword interface {
@@ -316,28 +304,6 @@ func (o *OcservUserRepository) Delete(ctx context.Context, uid string) (string, 
 	return ocservUser.Username, err
 }
 
-func (o *OcservUserRepository) TenDaysStats(ctx context.Context) ([]models.DailyTraffic, error) {
-	var results []models.DailyTraffic
-
-	start := time.Now().AddDate(0, 0, -10).Truncate(24 * time.Hour)
-
-	err := o.db.WithContext(ctx).
-		Model(&models.OcservUserTrafficStatistics{}).
-		Select(`
-		DATE(created_at) AS date,
-		SUM(rx) / 1073741824.0 AS rx,
-		SUM(tx) / 1073741824.0 AS tx`).
-		Where("created_at >= ?", start).
-		Group("DATE(created_at)").
-		Order("DATE(created_at)").
-		Scan(&results).Error
-
-	if err != nil {
-		return nil, err
-	}
-	return results, nil
-}
-
 func (o *OcservUserRepository) UpdateUsersByDeleteGroup(ctx context.Context, groupName string) ([]models.OcservUser, error) {
 	var users []models.OcservUser
 
@@ -391,140 +357,6 @@ func (o *OcservUserRepository) UserStatistics(ctx context.Context, uid string, d
 		return nil, err
 	}
 	return results, nil
-}
-
-func (o *OcservUserRepository) Statistics(ctx context.Context, dateStart, dateEnd *time.Time) ([]models.DailyTraffic, error) {
-	var results []models.DailyTraffic
-	err := o.db.WithContext(ctx).
-		Model(&models.OcservUserTrafficStatistics{}).
-		Joins("JOIN ocserv_users ou ON ou.id = ocserv_user_traffic_statistics.oc_user_id").
-		Select(`
-		DATE(ocserv_user_traffic_statistics.created_at) AS date,
-		SUM(ocserv_user_traffic_statistics.rx) / 1073741824.0 AS rx,
-		SUM(ocserv_user_traffic_statistics.tx) / 1073741824.0 AS tx
-	`).
-		Where("ocserv_user_traffic_statistics.created_at >= ?", *dateStart).
-		Where("ocserv_user_traffic_statistics.created_at <= ?", *dateEnd).
-		Group("DATE(ocserv_user_traffic_statistics.created_at)").
-		Order("DATE(ocserv_user_traffic_statistics.created_at)").
-		Scan(&results).Error
-
-	if err != nil {
-		return nil, err
-	}
-	return results, nil
-}
-
-func (o *OcservUserRepository) TotalUsers(ctx context.Context) (int64, error) {
-	var totalRecords int64
-
-	err := o.db.WithContext(ctx).Model(&models.OcservUser{}).Count(&totalRecords).Error
-	if err != nil {
-		return 0, err
-	}
-	return totalRecords, nil
-}
-
-func (o *OcservUserRepository) TopBandwidthUser(ctx context.Context) (TopBandwidthUsers, error) {
-	var (
-		topRx []models.OcservUser
-		topTx []models.OcservUser
-	)
-
-	result := TopBandwidthUsers{}
-
-	// Top RX
-	if err := o.db.WithContext(ctx).
-		Model(&models.OcservUser{}).
-		Select("uid, rx, tx, username, created_at").
-		Where("rx > 0").
-		Order("rx DESC, id DESC").
-		Limit(4).
-		Find(&topRx).Error; err != nil {
-		return result, err
-	}
-	result.TopRX = topRx
-
-	// Top TX
-	if err := o.db.WithContext(ctx).
-		Model(&models.OcservUser{}).
-		Select("uid, rx, tx, username, created_at").
-		Where("tx > 0").
-		Order("tx DESC, id DESC").
-		Limit(4).
-		Find(&topTx).Error; err != nil {
-		return result, err
-	}
-	result.TopTX = topTx
-
-	return result, nil
-}
-
-func (o *OcservUserRepository) TotalBandwidthUser(ctx context.Context, uid string) (TotalBandwidths, error) {
-	var total TotalBandwidths
-
-	//err := o.db.WithContext(ctx).
-	//	Model(&models.OcservUserTrafficStatistics{}).
-	//	Joins("JOIN ocserv_users ou ON ou.id = ocserv_user_traffic_statistics.oc_user_id").
-	//	Where("ou.uid = ?", uid).
-	//	Select(`
-	//    COALESCE(SUM(rx),0) / 1073741824.0 AS rx,
-	//    COALESCE(SUM(tx),0) / 1073741824.0 AS tx`).
-	//	Scan(&total).Error
-
-	err := o.db.WithContext(ctx).
-		Table("ocserv_user_traffic_statistics AS t").
-		Joins("JOIN ocserv_users ou ON ou.id = t.oc_user_id").
-		Where("ou.uid = ?", uid).
-		Select(`
-            COALESCE(SUM(t.rx),0) / 1073741824.0 AS rx,
-            COALESCE(SUM(t.tx),0) / 1073741824.0 AS tx
-        `).
-		Scan(&total).Error
-
-	if err != nil {
-		return total, err
-	}
-	return total, nil
-}
-
-func (o *OcservUserRepository) TotalBandwidth(ctx context.Context) (TotalBandwidths, error) {
-	var total TotalBandwidths
-
-	err := o.db.WithContext(ctx).
-		Model(&models.OcservUserTrafficStatistics{}).
-		Select(`
-        COALESCE(SUM(rx),0) / 1073741824.0 AS rx,
-        COALESCE(SUM(tx),0) / 1073741824.0 AS tx`).
-		Scan(&total).Error
-	if err != nil {
-		return total, err
-	}
-	return total, nil
-}
-
-func (o *OcservUserRepository) TotalBandwidthDateRange(ctx context.Context, dateStart, dateEnd *time.Time) (TotalBandwidths, error) {
-	var total TotalBandwidths
-
-	query := o.db.WithContext(ctx).
-		Model(&models.OcservUserTrafficStatistics{}).
-		Select(`
-			COALESCE(SUM(rx),0) / 1073741824.0 AS rx,
-			COALESCE(SUM(tx),0) / 1073741824.0 AS tx`)
-
-	// Apply filters based on dateStart and dateEnd
-	if dateStart != nil {
-		query = query.Where("created_at >= ?", *dateStart)
-	}
-	if dateEnd != nil {
-		query = query.Where("created_at <= ?", *dateEnd)
-	}
-
-	err := query.Scan(&total).Error
-	if err != nil {
-		return total, err
-	}
-	return total, nil
 }
 
 func (o *OcservUserRepository) TotalBandwidthUserDateRange(ctx context.Context, uid string, dateStart, dateEnd *time.Time) (TotalBandwidths, error) {
@@ -669,21 +501,35 @@ func (o *OcservUserRepository) RestoreExpired(ctx context.Context, uid string, e
 	})
 }
 
-func (o *OcservUserRepository) UsersStat(ctx context.Context) (UserStatsResult, error) {
-	var result UserStatsResult
+func (o *OcservUserRepository) UserSessionLogs(
+	ctx context.Context,
+	pagination *request.Pagination,
+	username string,
+	dateStart, dateEnd *time.Time,
+) (*[]models.OcservUserSessionLog, int64, error) {
+	var totalRecords int64
 
-	err := o.db.WithContext(ctx).
-		Model(&models.OcservUser{}).
-		Select(`
-			COUNT(*) FILTER (WHERE deactivated_at IS NULL AND is_locked = false) AS active,
-			COUNT(*) FILTER (WHERE deactivated_at IS NOT NULL) AS deactivated,
-			COUNT(*) FILTER (WHERE is_locked = true) AS locked
-		`).
-		Scan(&result).Error
+	query := o.db.WithContext(ctx).
+		Model(&models.OcservUserSessionLog{}).
+		Where("username = ?", username)
 
-	if err != nil {
-		return result, err
+	if dateStart != nil {
+		query = query.Where("created_at >= ?", *dateStart)
 	}
 
-	return result, nil
+	if dateEnd != nil {
+		query = query.Where("created_at < ?", dateEnd.AddDate(0, 0, 1))
+	}
+
+	if err := query.Count(&totalRecords).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var logs []models.OcservUserSessionLog
+	if err := request.Paginator(ctx, query, pagination).
+		Order("created_at DESC").
+		Find(&logs).Error; err != nil {
+		return nil, 0, err
+	}
+	return &logs, totalRecords, nil
 }

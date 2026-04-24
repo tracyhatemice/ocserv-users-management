@@ -28,9 +28,7 @@ func Serve(debug bool, host string, port int) {
 	cfg := config.Get()
 
 	database.Connect()
-	Migrate()
-
-	defer database.CloseConnection()
+	defer database.Close()
 
 	go routing.Serve(cfg)
 
@@ -48,7 +46,7 @@ func Serve(debug bool, host string, port int) {
 	logger.Warn("Shutting down... Signal Reason: %s", sig.String())
 
 	routing.Shutdown(ctx)
-	database.CloseConnection()
+	database.Close()
 
 	logger.Info("Api service shutdown complete")
 }

@@ -88,16 +88,42 @@ type DailyTraffic struct {
 	Tx   float64 `json:"tx"`   // in GiB
 }
 
+const (
+	EventUseragent     = "user-agent"
+	EventHandshake     = "handshake"
+	EventPeriodicStats = "periodic-stats"
+	EventDisconnect    = "disconnect"
+)
+
+type OcservUserSessionLog struct {
+	ID        uint      `json:"-" gorm:"primaryKey;autoIncrement"`
+	Username  string    `json:"username" gorm:"type:varchar(64);index" validate:"required"`
+	IP        string    `json:"ip" gorm:"type:varchar(45)" validate:"omitempty"`
+	Event     string    `json:"event" gorm:"type:varchar(64)" enums:"user-agent,handshake,periodic-stats,disconnect" validate:"required"`
+	Message   string    `json:"message" gorm:"type:text" validate:"required"`
+	CreatedAt time.Time `json:"created_at" validate:"required"`
+}
+
 func (c *OcservUserConfig) Value() (driver.Value, error) {
 	return json.Marshal(&c)
 }
 
 func (c *OcservUserConfig) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return fmt.Errorf("failed to convert value to []byte")
+	if value == nil {
+		return nil
 	}
-	return json.Unmarshal(bytes, c)
+
+	switch v := value.(type) {
+
+	case []byte:
+		return json.Unmarshal(v, c)
+
+	case string:
+		return json.Unmarshal([]byte(v), c)
+
+	default:
+		return fmt.Errorf("unsupported type for OcservUserConfig: %T", value)
+	}
 }
 
 func (o *OcservUser) BeforeUpdate(tx *gorm.DB) (err error) {

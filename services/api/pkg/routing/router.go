@@ -14,7 +14,6 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/tablewriter/renderer"
 	"github.com/olekukonko/tablewriter/tw"
-	echoSwagger "github.com/swaggo/echo-swagger"
 	"net/http"
 	"os"
 	"slices"
@@ -42,7 +41,7 @@ func Serve(cfg *config.Config) {
 	e = echo.New()
 
 	//e.Logger = NewLoggerWrapper(logger.GetLogger())
-	
+
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middlewares.RequestLoggerMiddleware())
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
@@ -73,8 +72,6 @@ func Serve(cfg *config.Config) {
 		e.Debug = true
 		e.Logger.SetLevel(LabstackLog.DEBUG)
 		verboseLog(server)
-
-		e.GET("/swagger/*", echoSwagger.WrapHandler)
 	} else {
 		e.Logger.SetLevel(LabstackLog.INFO)
 		e.HideBanner = true
@@ -92,8 +89,6 @@ func Serve(cfg *config.Config) {
 			path := c.Path()
 
 			switch {
-			case strings.HasPrefix(path, "/swagger"):
-				return true
 			case strings.HasPrefix(path, "/api/v1/ocserv/users/backup"):
 				return true
 			case strings.HasPrefix(path, "/api/v1/ocserv/groups/backup"):

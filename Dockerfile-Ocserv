@@ -9,6 +9,7 @@ ENV OCSERV_VERSION="${OCSERV_VERSION}"
 ENV CGO_ENABLED=1
 ENV GOOS=linux
 ENV GOARCH=amd64
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir /common
 
@@ -46,28 +47,34 @@ FROM debian:trixie-slim
 
 ENV PATH="/usr/local/sbin:$PATH"
 
-COPY scripts/ocserv_setup_docker.sh /setup.sh
-
+COPY scripts/docker_ocserv_setup.sh /setup.sh
 
 # Install dependencies
 # Install dependencies, run setup, cleanup
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        sudo \
-        ca-certificates \
-        procps \
-        gnutls-bin \
-        iptables \
-        openssl \
-        less \
-        dnsutils \
-        jq \
-        curl
+        # runtime deps
+        sudo ca-certificates procps gnutls-bin iptables \
+        openssl less dnsutils jq curl \
+        \
+        # build deps (needed for ocserv build)
+        build-essential meson ninja-build pkg-config git \
+        libgnutls28-dev libev-dev libreadline-dev libtasn1-bin \
+        libpam0g-dev liblz4-dev libseccomp-dev \
+        libnl-route-3-dev libkrb5-dev libradcli-dev \
+        libcurl4-gnutls-dev libcjose-dev libjansson-dev liboath-dev \
+        libprotobuf-c-dev libtalloc-dev libllhttp-dev protobuf-c-compiler \
+        gperf ipcalc
 
-RUN chmod +x /setup.sh && \
-    bash /setup.sh && \
-    rm -f /setup.sh && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# build ocserv service
+RUN chmod +x /setup.sh && bash /setup.sh
+
+# 🔥 remove build deps after install (important)
+RUN apt-get purge -y \
+        build-essential meson ninja-build pkg-config git protobuf-c-compiler gperf \
+    && apt-get autoremove -y \
+    \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /setup.sh
 
 # Set working directory
 WORKDIR /usr/local/bin
@@ -76,8 +83,8 @@ WORKDIR /usr/local/bin
 COPY --from=builder /app/api /usr/local/bin/api
 COPY --from=builder /webhook/webhook /usr/local/bin/webhook
 
-COPY scripts/ocserv_entrypoint.sh /entrypoint.sh
-COPY scripts/ocserv_server.sh /server.sh
+COPY scripts/docker_ocserv_entrypoint.sh /entrypoint.sh
+COPY scripts/docker_ocserv_server.sh /server.sh
 
 # Make binaries and scripts executable
 RUN chmod +x /entrypoint.sh /server.sh /usr/local/bin/api /usr/local/bin/webhook
