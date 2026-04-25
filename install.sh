@@ -587,11 +587,6 @@ setup_systemd() {
 
     # If not full setup, ensure ocserv is installed and configured
     if [[ "$full_setup" != true ]]; then
-        export POSTGRES_DB POSTGRES_HOST POSTGRES_PORT POSTGRES_USER POSTGRES_PASSWORD
-
-        ./scripts/systemd_postgres.sh
-        ok "✅ PostgreSQL is installed and properly configured."
-
         if ! command -v /usr/sbin/ocserv >/dev/null 2>&1; then
             die "⚠️ Ocserv not installed. Standalone dashboard requires ocserv."
         elif [[ ! -f /etc/ocserv/ocserv.conf ]]; then
@@ -604,6 +599,14 @@ setup_systemd() {
                 ok "✅ Ocserv is installed and properly configured."
             fi
         fi
+    fi
+
+    if ! command -v psql &> /dev/null || ! psql --version | grep -q "17"; then
+        echo "PostgreSQL 17 is not installed"
+        export POSTGRES_DB POSTGRES_HOST POSTGRES_PORT POSTGRES_USER POSTGRES_PASSWORD
+
+        ./scripts/systemd_postgres.sh
+        ok "✅ PostgreSQL is installed and properly configured."
     fi
 
     # Deploy backend and UI systemd services
