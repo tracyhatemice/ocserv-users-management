@@ -26,4 +26,5 @@ export * from './api/system-api';
 export * from './api/system-backup-api';
 export * from './api/system-restore-api';
 export * from './api/system-users-api';
+export * from './api/systemd-api';
 

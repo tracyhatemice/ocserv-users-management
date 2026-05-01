@@ -99,6 +99,7 @@ ENV_FILE="${BIN_DIR}/ocserv_dashboard.env"
 if [[ -f ".env" ]]; then
   sudo cp .env "$ENV_FILE"
   log "Copied environment file to $ENV_FILE"
+  echo "SYSTEMD=true" >> "$ENV_FILE"
 else
   warn ".env file not found, skipping environment copy"
 fi

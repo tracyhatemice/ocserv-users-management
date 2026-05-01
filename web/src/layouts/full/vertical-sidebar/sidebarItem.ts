@@ -33,6 +33,14 @@ export function getSidebarItems(): Menu[] {
     ];
 
     if (profileStore.isAdmin) {
+        if (import.meta.env.VITE_SYSTEMD == 'true') {
+            defaultSidebarItems.push({
+                title: t('TOOLS') + ' (systemd)',
+                icon: 'mdi-tools',
+                to: '/ocserv/management/systemd_tools'
+            });
+        }
+
         defaultSidebarItems.push({
             title: t('GROUP_DEFAULTS'),
             icon: 'mdi-router',

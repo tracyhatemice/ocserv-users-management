@@ -96,6 +96,7 @@ build_frontend() {
   log "Building frontend..."
   NODE_ENV=production \
   VITE_I18N_LANGUAGES="${LANGUAGES:-en}" \
+  VITE_SYSTEMD=true \
   yarn run build
 
   [[ -d dist ]] || die "dist folder not found after yarn build"

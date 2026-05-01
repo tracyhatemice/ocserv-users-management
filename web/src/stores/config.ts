@@ -10,12 +10,15 @@ export const useServerStore = defineStore('server', {
     actions: {
         async getServerInfo() {
             const api = new OCCTLApi();
-            await api.occtlServerInfoGet().then((res) => {
-                if (res.data) {
-                    this.Version = res.data.version || '';
-                    this.OcctlVersion = (res.data.occtl_version || '').replace(/\n/g, '<br />');
-                }
-            });
+            await api
+                .occtlServerInfoGet()
+                .then((res) => {
+                    if (res.data) {
+                        this.Version = res.data.version || '';
+                        this.OcctlVersion = (res.data.occtl_version || '').replace(/\n/g, '<br />');
+                    }
+                })
+                .catch(() => {});
         }
     },
     getters: {

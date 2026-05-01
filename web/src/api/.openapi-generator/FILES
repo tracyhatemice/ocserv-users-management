@@ -13,6 +13,7 @@ api/system-api.ts
 api/system-backup-api.ts
 api/system-restore-api.ts
 api/system-users-api.ts
+api/systemd-api.ts
 common.ts
 configuration.ts
 git_push.sh
@@ -73,4 +74,6 @@ models/system-setup-system-response.ts
 models/system-setup-system.ts
 models/system-user-login-response.ts
 models/system-users-response.ts
+models/systemd-action-response.ts
+models/systemd-ocserv-systemd-status.ts
 models/user-ocpasswd.ts

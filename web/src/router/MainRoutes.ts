@@ -14,6 +14,11 @@ const MainRoutes = {
             component: () => import('@/views/dashboard/index.vue')
         },
         {
+            name: 'Ocserv Tools',
+            path: '/ocserv/management/systemd_tools',
+            component: () => import('@/views/ocserv/Tools.vue')
+        },
+        {
             name: 'Ocserv Group Defaults',
             path: '/ocserv/management/groups/defaults',
             component: () => import('@/views/ocserv_group/OcservGroupDefaults.vue')
@@ -62,24 +67,6 @@ const MainRoutes = {
             component: () => import('@/views/ocserv_user/OcservUserUpdate.vue'),
             props: true
         },
-        // {
-        //     name: 'Ocserv User Statistics',
-        //     path: '/ocserv/management/users/:uid/statistics',
-        //     component: () => import('@/views/ocserv_user/OcservUserStatistics.vue'),
-        //     props: (route: RouteLocationNormalized) => ({
-        //         uid: route.params.uid as string,
-        //         username: route.query.username as string | undefined
-        //     })
-        // },
-        // {
-        //     name: 'Ocserv User Session Logs',
-        //     path: '/ocserv/management/users/:uid/session_logs',
-        //     component: () => import('@/views/ocserv_user/OcservUserSessionLogs.vue'),
-        //     props: (route: RouteLocationNormalized) => ({
-        //         uid: route.params.uid as string,
-        //         username: route.query.username as string | undefined
-        //     })
-        // },
         {
             name: 'Ocserv Sync',
             path: '/ocserv/management/ocserv/sync',

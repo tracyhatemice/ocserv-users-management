@@ -8,7 +8,8 @@ import {
     ModelsOcservUserTrafficTypeEnum,
     OcservUsersApi,
     type OcservUsersGetFilterEnum,
-    ReportApi, type ReportOcservUserReportResponse
+    ReportApi,
+    type ReportOcservUserReportResponse
 } from '@/api';
 import { getAuthorization } from '@/utils/request';
 import { bytesToGB, formatDate, trafficTypesTransformer } from '@/utils/convertors';
@@ -269,13 +270,15 @@ const reload = () => {
 };
 
 const getUserStats = () => {
-    const apiStats = new ReportApi()
-    apiStats.reportsUsersGet({
-        ...getAuthorization()
-    }).then((res) => {
-        console.log(res.data);
-        Object.assign(userStats.value, res.data);
-    });
+    const apiStats = new ReportApi();
+    apiStats
+        .reportsUsersGet({
+            ...getAuthorization()
+        })
+        .then((res) => {
+            console.log(res.data);
+            Object.assign(userStats.value, res.data);
+        });
 };
 
 onMounted(() => {

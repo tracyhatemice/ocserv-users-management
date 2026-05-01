@@ -53,4 +53,6 @@ export * from './system-setup-system';
 export * from './system-setup-system-response';
 export * from './system-user-login-response';
 export * from './system-users-response';
+export * from './systemd-action-response';
+export * from './systemd-ocserv-systemd-status';
 export * from './user-ocpasswd';
