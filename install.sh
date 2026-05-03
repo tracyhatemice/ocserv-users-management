@@ -563,12 +563,14 @@ setup_docker() {
             print_message success "🎉 Pulled successfully: $image"
         fi
     }
-
     check_and_pull golang:1.25.0
     check_and_pull debian:trixie-slim
     check_and_pull nginx:alpine
 
     print_message success "🚀 All required Docker images are ready!"
+
+    print_message info "🛠 Change postgres host environment for docker mode ..."
+    sed -i 's/^POSTGRES_HOST=.*/POSTGRES_HOST=ocserv-postgres/' "${ENV_FILE}"
 
     print_message info "🛠 Starting Docker Compose..."
     sudo docker compose up --build -d
