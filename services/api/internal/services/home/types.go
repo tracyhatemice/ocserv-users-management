@@ -70,28 +70,40 @@ type GetHomeResponse struct {
 	//IRoutes    *[]models.Iroute       `json:"iroutes" validate:"omitempty"` // has bug on version 1.2.4
 }
 
+type CPU struct {
+	AvgPercent float64 `json:"avg_percent"`
+	UsedUnits  float64 `json:"used_units"`
+	Total      int     `json:"total"`
+}
+
+type RAM struct {
+	Used        float64 `json:"used"`
+	Total       float64 `json:"total"`
+	UsedPercent float64 `json:"used_percent"`
+}
+
+type Swap struct {
+	Used        float64 `json:"used"`
+	Total       float64 `json:"total"`
+	UsedPercent float64 `json:"used_percent"`
+}
+
+type DockerStats struct {
+	Name string `json:"name" validate:"required"`
+	CPU  CPU    `json:"cpu" validate:"omitempty"`
+	RAM  RAM    `json:"ram" validate:"omitempty"`
+}
+
 type DockerService struct {
-	Name       string  `json:"name" validate:"required"`
-	CPUPercent float64 `json:"cpu_percent" validate:"omitempty"`
-	RAMPercent float64 `json:"ram_percent" validate:"omitempty"`
+	Postgres   DockerStats `json:"postgres" validate:"required"`
+	Ocserv     DockerStats `json:"ocserv" validate:"required"`
+	LogStream  DockerStats `json:"log_stream" validate:"required"`
+	UserExpiry DockerStats `json:"user_expiry" validate:"required"`
+	Web        DockerStats `json:"web" validate:"required"`
 }
 
 type ServerStatusResponse struct {
-	CPU struct {
-		UsedPercent float64 `json:"used_percent"`
-		Total       int     `json:"total"`
-	} `json:"cpu"`
-
-	RAM struct {
-		Used        uint64  `json:"used"`
-		Total       uint64  `json:"total"`
-		UsedPercent float64 `json:"used_percent"`
-	} `json:"ram"`
-
-	Swap struct {
-		Used        uint64  `json:"used"`
-		Total       uint64  `json:"total"`
-		UsedPercent float64 `json:"used_percent"`
-	} `json:"swap"`
-	//DockerServices []DockerService `json:"docker_services" validate:"omitempty"`
+	CPU  CPU  `json:"cpu"`
+	RAM  RAM  `json:"ram"`
+	Swap Swap `json:"swap"`
 }

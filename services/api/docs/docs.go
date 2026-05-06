@@ -3093,6 +3093,20 @@ const docTemplate = `{
                 }
             }
         },
+        "home.CPU": {
+            "type": "object",
+            "properties": {
+                "avg_percent": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "used_units": {
+                    "type": "number"
+                }
+            }
+        },
         "home.CurrentStats": {
             "type": "object",
             "properties": {
@@ -3162,17 +3176,44 @@ const docTemplate = `{
         "home.DockerService": {
             "type": "object",
             "required": [
+                "log_stream",
+                "ocserv",
+                "postgres",
+                "user_expiry",
+                "web"
+            ],
+            "properties": {
+                "log_stream": {
+                    "$ref": "#/definitions/home.DockerStats"
+                },
+                "ocserv": {
+                    "$ref": "#/definitions/home.DockerStats"
+                },
+                "postgres": {
+                    "$ref": "#/definitions/home.DockerStats"
+                },
+                "user_expiry": {
+                    "$ref": "#/definitions/home.DockerStats"
+                },
+                "web": {
+                    "$ref": "#/definitions/home.DockerStats"
+                }
+            }
+        },
+        "home.DockerStats": {
+            "type": "object",
+            "required": [
                 "name"
             ],
             "properties": {
-                "cpu_percent": {
-                    "type": "number"
+                "cpu": {
+                    "$ref": "#/definitions/home.CPU"
                 },
                 "name": {
                     "type": "string"
                 },
-                "ram_percent": {
-                    "type": "number"
+                "ram": {
+                    "$ref": "#/definitions/home.RAM"
                 }
             }
         },
@@ -3281,47 +3322,45 @@ const docTemplate = `{
                 }
             }
         },
+        "home.RAM": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "number"
+                },
+                "used": {
+                    "type": "number"
+                },
+                "used_percent": {
+                    "type": "number"
+                }
+            }
+        },
         "home.ServerStatusResponse": {
             "type": "object",
             "properties": {
                 "cpu": {
-                    "type": "object",
-                    "properties": {
-                        "total": {
-                            "type": "integer"
-                        },
-                        "used_percent": {
-                            "type": "number"
-                        }
-                    }
+                    "$ref": "#/definitions/home.CPU"
                 },
                 "ram": {
-                    "type": "object",
-                    "properties": {
-                        "total": {
-                            "type": "integer"
-                        },
-                        "used": {
-                            "type": "integer"
-                        },
-                        "used_percent": {
-                            "type": "number"
-                        }
-                    }
+                    "$ref": "#/definitions/home.RAM"
                 },
                 "swap": {
-                    "type": "object",
-                    "properties": {
-                        "total": {
-                            "type": "integer"
-                        },
-                        "used": {
-                            "type": "integer"
-                        },
-                        "used_percent": {
-                            "type": "number"
-                        }
-                    }
+                    "$ref": "#/definitions/home.Swap"
+                }
+            }
+        },
+        "home.Swap": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "number"
+                },
+                "used": {
+                    "type": "number"
+                },
+                "used_percent": {
+                    "type": "number"
                 }
             }
         },

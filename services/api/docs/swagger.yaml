@@ -100,6 +100,15 @@ definitions:
     - config
     - name
     type: object
+  home.CPU:
+    properties:
+      avg_percent:
+        type: number
+      total:
+        type: integer
+      used_units:
+        type: number
+    type: object
   home.CurrentStats:
     properties:
       _Last stats reset:
@@ -146,12 +155,31 @@ definitions:
     type: object
   home.DockerService:
     properties:
-      cpu_percent:
-        type: number
+      log_stream:
+        $ref: '#/definitions/home.DockerStats'
+      ocserv:
+        $ref: '#/definitions/home.DockerStats'
+      postgres:
+        $ref: '#/definitions/home.DockerStats'
+      user_expiry:
+        $ref: '#/definitions/home.DockerStats'
+      web:
+        $ref: '#/definitions/home.DockerStats'
+    required:
+    - log_stream
+    - ocserv
+    - postgres
+    - user_expiry
+    - web
+    type: object
+  home.DockerStats:
+    properties:
+      cpu:
+        $ref: '#/definitions/home.CPU'
       name:
         type: string
-      ram_percent:
-        type: number
+      ram:
+        $ref: '#/definitions/home.RAM'
     required:
     - name
     type: object
@@ -224,33 +252,32 @@ definitions:
       general_info:
         $ref: '#/definitions/home.GeneralInfo'
     type: object
+  home.RAM:
+    properties:
+      total:
+        type: number
+      used:
+        type: number
+      used_percent:
+        type: number
+    type: object
   home.ServerStatusResponse:
     properties:
       cpu:
-        properties:
-          total:
-            type: integer
-          used_percent:
-            type: number
-        type: object
+        $ref: '#/definitions/home.CPU'
       ram:
-        properties:
-          total:
-            type: integer
-          used:
-            type: integer
-          used_percent:
-            type: number
-        type: object
+        $ref: '#/definitions/home.RAM'
       swap:
-        properties:
-          total:
-            type: integer
-          used:
-            type: integer
-          used_percent:
-            type: number
-        type: object
+        $ref: '#/definitions/home.Swap'
+    type: object
+  home.Swap:
+    properties:
+      total:
+        type: number
+      used:
+        type: number
+      used_percent:
+        type: number
     type: object
   middlewares.PermissionDenied:
     properties:

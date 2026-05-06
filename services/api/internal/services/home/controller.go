@@ -212,12 +212,26 @@ func (ctl *Controller) SystemUsageStats(c echo.Context) error {
 	// -----------------------------
 	// CPU
 	g.Go(func() error {
-		cpuPercent, err := cpu.Percent(time.Second, false)
+		cpuPercents, err := cpu.Percent(time.Second, true)
 		if err != nil {
 			return err
 		}
-		if len(cpuPercent) > 0 {
-			stats.CPU.UsedPercent = cpuPercent[0]
+
+		if len(cpuPercents) > 0 {
+			var sum float64
+
+			for _, p := range cpuPercents {
+				sum += p
+			}
+
+			avg := sum / float64(len(cpuPercents)) // average %
+
+			cpuCount := len(cpuPercents)
+
+			usedUnits := (avg / 100) * float64(cpuCount)
+
+			stats.CPU.AvgPercent = math.Round(avg*100) / 100
+			stats.CPU.UsedUnits = math.Round(usedUnits*100) / 100
 		}
 
 		cpuTotal, err := cpu.Counts(true)
@@ -237,9 +251,11 @@ func (ctl *Controller) SystemUsageStats(c echo.Context) error {
 			return err
 		}
 
-		stats.RAM.Used = vm.Used
-		stats.RAM.Total = vm.Total
-		stats.RAM.UsedPercent = vm.UsedPercent
+		const gb = 1024 * 1024 * 1024
+
+		stats.RAM.Used = math.Round((float64(vm.Used)/float64(gb))*100) / 100
+		stats.RAM.Total = math.Round((float64(vm.Total)/float64(gb))*100) / 100
+		stats.RAM.UsedPercent = math.Round(vm.UsedPercent*100) / 100
 
 		return nil
 	})
@@ -252,9 +268,11 @@ func (ctl *Controller) SystemUsageStats(c echo.Context) error {
 			return err
 		}
 
-		stats.Swap.Used = sw.Used
-		stats.Swap.Total = sw.Total
-		stats.Swap.UsedPercent = sw.UsedPercent
+		const gb = 1024 * 1024 * 1024
+
+		stats.Swap.Used = math.Round((float64(sw.Used)/float64(gb))*100) / 100
+		stats.Swap.Total = math.Round((float64(sw.Total)/float64(gb))*100) / 100
+		stats.Swap.UsedPercent = math.Round(sw.UsedPercent*100) / 100
 
 		return nil
 	})
@@ -282,7 +300,7 @@ func (ctl *Controller) ContainerUsageStats(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	if _, err := os.Stat("/.dockerenv"); err != nil {
-		return c.JSON(http.StatusOK, []DockerService{})
+		return c.JSON(http.StatusOK, DockerService{})
 	}
 
 	dockerClient, err := client.NewClientWithOpts(
@@ -307,11 +325,9 @@ func (ctl *Controller) ContainerUsageStats(c echo.Context) error {
 		"ocserv-postgres": true,
 	}
 
-	results := make(chan DockerService, len(containers))
+	results := make(chan DockerStats, len(containers))
 
 	g, gctx := errgroup.WithContext(ctx)
-
-	// 🔒 limit concurrency (important for Docker stats streams)
 	g.SetLimit(5)
 
 	for _, ctr := range containers {
@@ -329,7 +345,7 @@ func (ctl *Controller) ContainerUsageStats(c echo.Context) error {
 		g.Go(func() error {
 			stat, err := dockerClient.ContainerStats(gctx, ctr.ID, false)
 			if err != nil {
-				return nil // optionally log
+				return nil
 			}
 			defer stat.Body.Close()
 
@@ -338,31 +354,47 @@ func (ctl *Controller) ContainerUsageStats(c echo.Context) error {
 				return nil
 			}
 
-			// CPU
+			// ===== CPU =====
 			cpuDelta := float64(v.CPUStats.CPUUsage.TotalUsage - v.PreCPUStats.CPUUsage.TotalUsage)
 			systemDelta := float64(v.CPUStats.SystemUsage - v.PreCPUStats.SystemUsage)
 
-			cpuPercent := 0.0
-			if cpuDelta > 0 && systemDelta > 0 {
-				onlineCPUs := float64(v.CPUStats.OnlineCPUs)
-				if onlineCPUs == 0 {
-					onlineCPUs = float64(len(v.CPUStats.CPUUsage.PercpuUsage))
-				}
-				cpuPercent = (cpuDelta / systemDelta) * onlineCPUs * 100
-				cpuPercent = math.Round(cpuPercent*100) / 100
+			avgPercent := 0.0
+			totalCPUs := int(v.CPUStats.OnlineCPUs)
+			if totalCPUs == 0 {
+				totalCPUs = len(v.CPUStats.CPUUsage.PercpuUsage)
 			}
 
-			// RAM
+			if cpuDelta > 0 && systemDelta > 0 && totalCPUs > 0 {
+				avgPercent = (cpuDelta / systemDelta) * float64(totalCPUs) * 100
+				avgPercent = math.Round(avgPercent*100) / 100
+			}
+
+			usedUnits := math.Round(((avgPercent/100)*float64(totalCPUs))*100) / 100
+
+			// ===== RAM =====
+			const gb = 1024 * 1024 * 1024
+
+			usedGB := math.Round((float64(v.MemoryStats.Usage)/float64(gb))*100) / 100
+			totalGB := math.Round((float64(v.MemoryStats.Limit)/float64(gb))*100) / 100
+
 			memPercent := 0.0
 			if v.MemoryStats.Limit > 0 {
-				memPercent = float64(v.MemoryStats.Usage) / float64(v.MemoryStats.Limit) * 100
+				memPercent = (float64(v.MemoryStats.Usage) / float64(v.MemoryStats.Limit)) * 100
 				memPercent = math.Round(memPercent*100) / 100
 			}
 
-			results <- DockerService{
-				Name:       name,
-				CPUPercent: cpuPercent,
-				RAMPercent: memPercent,
+			results <- DockerStats{
+				Name: name,
+				CPU: CPU{
+					AvgPercent: avgPercent,
+					UsedUnits:  usedUnits,
+					Total:      totalCPUs,
+				},
+				RAM: RAM{
+					Used:        usedGB,
+					Total:       totalGB,
+					UsedPercent: memPercent,
+				},
 			}
 
 			return nil
@@ -374,9 +406,22 @@ func (ctl *Controller) ContainerUsageStats(c echo.Context) error {
 		close(results)
 	}()
 
-	var service []DockerService
+	// ✅ Build final struct
+	var service DockerService
+
 	for r := range results {
-		service = append(service, r)
+		switch r.Name {
+		case "ocserv-postgres":
+			service.Postgres = r
+		case "ocserv":
+			service.Ocserv = r
+		case "log_stream":
+			service.LogStream = r
+		case "user_expiry":
+			service.UserExpiry = r
+		case "web":
+			service.Web = r
+		}
 	}
 
 	if err := g.Wait(); err != nil {
