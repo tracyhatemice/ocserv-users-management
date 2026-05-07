@@ -1,4 +1,5 @@
 import type {
+    HomeDockerService,
     ModelsDailyTraffic,
     ModelsIPBanPoints,
     ModelsOcservGroup,
@@ -145,4 +146,72 @@ const dummyGroupList: ModelsOcservGroup[] = [
     { id: 4, name: 'Anc 1298', owner: 'masoud' }
 ];
 
-export { dummyTrafficData, dummyOnlineUsers, dummyBanIPs, dummyGroupConfig, dummyGroupList };
+const mockHomeDockerService: HomeDockerService = {
+    log_stream: {
+        name: "log_stream",
+        cpu: {
+            avg_percent: 12.5,
+            total: 2000,
+            used_units: 250
+        },
+        ram: {
+            total: 4096,
+            used: 1024,
+            used_percent: 25
+        }
+    },
+    ocserv: {
+        name: "ocserv",
+        cpu: {
+            avg_percent: 8.3,
+            total: 2000,
+            used_units: 166
+        },
+        ram: {
+            total: 2048,
+            used: 512,
+            used_percent: 25
+        }
+    },
+    postgres: {
+        name: "postgres",
+        cpu: {
+            avg_percent: 15.7,
+            total: 4000,
+            used_units: 628
+        },
+        ram: {
+            total: 8192,
+            used: 4096,
+            used_percent: 50
+        }
+    },
+    user_expiry: {
+        name: "user_expiry",
+        cpu: {
+            avg_percent: 2.1,
+            total: 1000,
+            used_units: 21
+        },
+        ram: {
+            total: 1024,
+            used: 256,
+            used_percent: 25
+        }
+    },
+    web: {
+        name: "web",
+        cpu: {
+            avg_percent: 25.0,
+            total: 4000,
+            used_units: 1000
+        },
+        ram: {
+            total: 4096,
+            used: 2048,
+            used_percent: 50
+        }
+    }
+};
+
+export { dummyTrafficData, dummyOnlineUsers, dummyBanIPs, dummyGroupConfig, dummyGroupList, mockHomeDockerService };

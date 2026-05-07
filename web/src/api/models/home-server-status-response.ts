@@ -18,6 +18,9 @@
 import type { HomeCPU } from './home-cpu';
 // May contain unused imports in some cases
 // @ts-ignore
+import type { HomeDisk } from './home-disk';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { HomeRAM } from './home-ram';
 // May contain unused imports in some cases
 // @ts-ignore
@@ -35,6 +38,12 @@ export interface HomeServerStatusResponse {
      * @memberof HomeServerStatusResponse
      */
     'cpu'?: HomeCPU;
+    /**
+     * 
+     * @type {HomeDisk}
+     * @memberof HomeServerStatusResponse
+     */
+    'disk'?: HomeDisk;
     /**
      * 
      * @type {HomeRAM}

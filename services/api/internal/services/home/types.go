@@ -88,6 +88,12 @@ type Swap struct {
 	UsedPercent float64 `json:"used_percent"`
 }
 
+type Disk struct {
+	Used        float64 `json:"used"`
+	Total       float64 `json:"total"`
+	UsedPercent float64 `json:"used_percent"`
+}
+
 type DockerStats struct {
 	Name string `json:"name" validate:"required"`
 	CPU  CPU    `json:"cpu" validate:"omitempty"`
@@ -106,4 +112,5 @@ type ServerStatusResponse struct {
 	CPU  CPU  `json:"cpu"`
 	RAM  RAM  `json:"ram"`
 	Swap Swap `json:"swap"`
+	Disk Disk `json:"disk"`
 }

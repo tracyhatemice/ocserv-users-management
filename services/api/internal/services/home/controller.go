@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
 
 	_ "github.com/docker/docker/api/types"
@@ -273,6 +274,21 @@ func (ctl *Controller) SystemUsageStats(c echo.Context) error {
 		stats.Swap.Used = math.Round((float64(sw.Used)/float64(gb))*100) / 100
 		stats.Swap.Total = math.Round((float64(sw.Total)/float64(gb))*100) / 100
 		stats.Swap.UsedPercent = math.Round(sw.UsedPercent*100) / 100
+
+		return nil
+	})
+
+	g.Go(func() error {
+		usage, err := disk.Usage("/")
+		if err != nil {
+			return err
+		}
+
+		const gb = 1024 * 1024 * 1024
+
+		stats.Disk.Used = math.Round((float64(usage.Used)/float64(gb))*100) / 100
+		stats.Disk.Total = math.Round((float64(usage.Total)/float64(gb))*100) / 100
+		stats.Disk.UsedPercent = math.Round(usage.UsedPercent*100) / 100
 
 		return nil
 	})

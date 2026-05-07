@@ -153,6 +153,15 @@ definitions:
       raw_tx:
         type: integer
     type: object
+  home.Disk:
+    properties:
+      total:
+        type: number
+      used:
+        type: number
+      used_percent:
+        type: number
+    type: object
   home.DockerService:
     properties:
       log_stream:
@@ -265,6 +274,8 @@ definitions:
     properties:
       cpu:
         $ref: '#/definitions/home.CPU'
+      disk:
+        $ref: '#/definitions/home.Disk'
       ram:
         $ref: '#/definitions/home.RAM'
       swap:

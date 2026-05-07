@@ -26,6 +26,7 @@ models/customer-usage-response.ts
 models/group-unsynced-group.ts
 models/home-cpu.ts
 models/home-current-stats.ts
+models/home-disk.ts
 models/home-docker-service.ts
 models/home-docker-stats.ts
 models/home-general-info.ts

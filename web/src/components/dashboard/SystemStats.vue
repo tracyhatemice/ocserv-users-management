@@ -169,6 +169,36 @@ onUnmounted(() => {
                             </v-col>
                         </v-row>
                     </v-col>
+
+                    <!-- DISK USAGE -->
+                    <v-col cols="12" lg="2" sm="6">
+                        <v-row class="text-center">
+                            <v-col cols="12">
+                                <v-progress-circular
+                                    :model-value="systemUsage.disk?.used_percent"
+                                    :size="100"
+                                    :width="12"
+                                    bg-color="grey100"
+                                    color="primary"
+                                    reveal
+                                    rounded
+                                >
+                                    <v-avatar color="surface-light" size="70">
+                                        {{ systemUsage.disk?.used_percent }}%
+                                    </v-avatar>
+                                </v-progress-circular>
+                            </v-col>
+                            <v-col cols="12">
+                                <div class="text-subtitle-2 text-capitalize">{{ t('DISK_USAGE') }}</div>
+                                <div class="text-subtitle-2" dir="LTR">
+                                    <span class="me-1">{{ systemUsage.disk?.used }}</span>
+                                    /
+                                    <span class="ms-1">{{ systemUsage.disk?.total }} </span>
+                                    GB
+                                </div>
+                            </v-col>
+                        </v-row>
+                    </v-col>
                 </v-row>
             </v-card-text>
         </v-card-item>

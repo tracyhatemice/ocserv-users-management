@@ -3173,6 +3173,20 @@ const docTemplate = `{
                 }
             }
         },
+        "home.Disk": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "number"
+                },
+                "used": {
+                    "type": "number"
+                },
+                "used_percent": {
+                    "type": "number"
+                }
+            }
+        },
         "home.DockerService": {
             "type": "object",
             "required": [
@@ -3341,6 +3355,9 @@ const docTemplate = `{
             "properties": {
                 "cpu": {
                     "$ref": "#/definitions/home.CPU"
+                },
+                "disk": {
+                    "$ref": "#/definitions/home.Disk"
                 },
                 "ram": {
                     "$ref": "#/definitions/home.RAM"

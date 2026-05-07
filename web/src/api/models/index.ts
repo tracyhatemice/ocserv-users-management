@@ -6,6 +6,7 @@ export * from './customer-usage-response';
 export * from './group-unsynced-group';
 export * from './home-cpu';
 export * from './home-current-stats';
+export * from './home-disk';
 export * from './home-docker-service';
 export * from './home-docker-stats';
 export * from './home-general-info';
